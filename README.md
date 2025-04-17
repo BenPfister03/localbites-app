@@ -1,30 +1,49 @@
-# localbites-app
-# LocalBites - Neighborhood Restaurant Explorer 🍴
+# 🍽️ LocalBites - Neighborhood Restaurant Explorer
 
-**Find, rate, and save your favorite local restaurants!**
+**Discover local restaurants based on your location, dietary needs, and budget. Save favorites, rate spots, and explore popular areas around you — all from your browser.**
 
-## 🔥 Features
-- Location-based restaurant discovery using Google Maps
-- Filters: dietary needs, price, distance
-- Quick ratings, tips, and favorite lists
-- Firebase login & data storage
+---
 
-## 🛠️ Tech Stack
-- HTML/CSS/JavaScript
-- Google Maps JavaScript API
-- Firebase (Auth + Firestore)
+## 🚀 Live Demo
 
-## 🚀 How to Run
-1. Clone the repo
-2. Add your `config.js` with Firebase credentials
-3. Open `index.html` in your browser (or deploy via Firebase Hosting)
+🌐 [View the Live App](https://your-live-app-link-here.web.app)  
+📺 [Watch the Presentation Video](https://youtube.com/your-unlisted-video-link)
 
-## 👤 Test Login
-- Username: `bob`
-- Password: `bobpass`
+---
 
-## 📺 Presentation Video
-[Unlisted YouTube Link Here]
+## 🔑 Test Login Credentials
 
-## 🌐 Live App
-[Live Firebase/Vercel/Netlify Link Here]
+- **Email:** `bob@example.com`  
+- **Password:** `bobpass`
+
+---
+
+## ✨ Features
+
+- 🔐 **User Authentication** (Login, Logout, Profile)
+- 📍 **Location-Based Restaurant Discovery** via Google Maps
+- 🍔 **Filters**: Dietary options, price range, and distance
+- ⭐ **Quick Rate** system (★★★★★)
+- ❤️ **Favorites** list saved to user profile
+- 💬 **Short Tips** (e.g., “Try the tacos!”)
+- 📊 **Data Visualization**: 
+  - Most-visited cuisines (bar chart)
+  - Heatmap of popular areas (mock data)
+
+---
+
+## 🧑‍💻 Tech Stack
+
+| Category     | Technology |
+|--------------|-------------|
+| Frontend     | HTML, CSS, JavaScript |
+| UI Libraries | (Optional) Tailwind or Bootstrap |
+| Maps         | Google Maps JavaScript API |
+| Backend      | Firebase Authentication & Firestore |
+| Hosting      | Firebase Hosting |
+| Analytics    | Mock Data & Custom Charts |
+
+---
+
+## 📂 Project Structure
+
