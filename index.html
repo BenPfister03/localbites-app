@@ -145,8 +145,62 @@
       background: transparent;
       border: none;
       font-size: 30px;
-      line-height: 1;  
+      line-height: 1;
       text-align: center;
+    }
+
+    .rating-container {
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .star-rating {
+      display: inline-block;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .star-rating .star {
+      color: #ddd;
+      display: inline-block;
+      transition: all 0.3s;
+      text-shadow:
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        1px 1px 0 #000;
+      
+      -webkit-text-stroke: 1px #000;
+      
+      position: relative;
+    }
+
+    .star-rating .star.hover {
+      color: #ffd700;
+      text-shadow:
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        1px 1px 0 #000;
+    }
+
+    .star-rating .star.selected {
+      color: #ff9800;
+      text-shadow:
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        1px 1px 0 #000;
+    }
+
+    .star-rating .star:active {
+      filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.7));
+    }
+
+    .rating-text {
+      margin-top: 5px;
+      font-size: 14px;
+      color: #666;
     }
   </style>
 </head>
@@ -212,25 +266,94 @@
           header.style.opacity = 1;
 
           loadMap();
+          setupRatingStars();
         })
         .catch(error => alert("Login failed: " + error.message));
     }
 
+    function setupRatingStars() {
+      document.addEventListener('click', function (e) {
+        if (e.target.classList.contains('star')) {
+          const ratingContainer = e.target.closest('.star-rating');
+          const placeId = ratingContainer.getAttribute('data-place-id');
+          const rating = parseInt(e.target.getAttribute('data-value'));
+
+         
+          const stars = ratingContainer.querySelectorAll('.star');
+          stars.forEach((star, index) => {
+            star.classList.toggle('selected', index < rating);
+          });
+
+          
+          submitRating(placeId, rating);
+        }
+      });
+
+      
+      document.addEventListener('mouseover', function (e) {
+        if (e.target.classList.contains('star')) {
+          const ratingContainer = e.target.closest('.star-rating');
+          const hoverValue = parseInt(e.target.getAttribute('data-value'));
+
+          const stars = ratingContainer.querySelectorAll('.star');
+          stars.forEach((star, index) => {
+            star.classList.toggle('hover', index < hoverValue);
+          });
+        }
+      });
+
+     
+      document.addEventListener('mouseout', function (e) {
+        if (e.target.classList.contains('star')) {
+          const ratingContainer = e.target.closest('.star-rating');
+          const stars = ratingContainer.querySelectorAll('.star');
+          stars.forEach(star => star.classList.remove('hover'));
+        }
+      });
+    }
+
     function submitRating(placeId, rating) {
       const user = auth.currentUser;
-      if (!user) return alert("Login required");
+      if (!user) {
+        alert("Please login to rate places");
+        return;
+      }
 
-      db.collection("ratings").add({
-        userId: user.uid,
-        placeId,
-        rating,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-      }).then(() => {
-        alert("Thanks for your rating!");
-      }).catch(err => {
-        console.error("Rating error:", err);
-        alert("Rating failed.");
-      });
+      
+      if (rating < 1 || rating > 5) {
+        console.error("Invalid rating value");
+        return;
+      }
+
+ 
+      db.collection("ratings")
+        .where("userId", "==", user.uid)
+        .where("placeId", "==", placeId)
+        .get()
+        .then((querySnapshot) => {
+          if (querySnapshot.empty) {
+           
+            return db.collection("ratings").add({
+              userId: user.uid,
+              placeId,
+              rating,
+              timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          } else {
+            
+            return querySnapshot.docs[0].ref.update({
+              rating,
+              timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          }
+        })
+        .then(() => {
+          console.log("Rating saved successfully");
+        })
+        .catch(err => {
+          console.error("Rating error:", err);
+          alert("Failed to save rating");
+        });
     }
 
     function getUserLocation(map) {
@@ -311,7 +434,19 @@
                   "🍴 Restaurant";
               L.marker([lat, lon])
                 .addTo(map)
-                .bindPopup(`${name} <br>${type}`);
+                .bindPopup(`
+                    ${name} <br>${type}
+                    <div class="rating-container">
+                   <div class="star-rating" data-place-id="${place.id || place.tags.name}">
+                   <span class="star" data-value="1">★</span>
+                   <span class="star" data-value="2">★</span>
+                   <span class="star" data-value="3">★</span>
+                   <span class="star" data-value="4">★</span>
+                   <span class="star" data-value="5">★</span>
+                   </div>
+                   <div class="rating-text">Rate this place</div>
+                   </div>
+              `);
             }
           });
         }).catch(error => {
