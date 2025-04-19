@@ -1,1 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Local Bites - Sign Up & Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/auth.css">
+</head>
+<body>
+  <div class="auth-container">
+    <div class="form-box signup-box">
+      <h2>Sign Up</h2>
+      <form id="signup-form">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required>
+        
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required>
+        
+        <label for="password">Create Password</label>
+        <input type="password" id="password" name="password" required>
+        
+        <label for="retype">Retype Password</label>
+        <input type="password" id="retype" name="retype" required>
+        
+        <button type="submit">Sign Up</button>
+      </form>
+    </div>
 
+    <div class="form-box login-box">
+      <h2>Login</h2>
+      <form id="login-form">
+        <label for="login-user">Username</label>
+        <input type="text" id="login-user" name="login-user" required>
+        
+        <label for="login-pass">Password</label>
+        <input type="password" id="login-pass" name="login-pass" required>
+        
+        <button type="submit">Login</button>
+      </form>
+      <p class="auth-switch">Already have an account? <a href="#" id="go-to-login">Login</a></p>
+    </div>
+  </div>
+
+  <script src="scripts/main.js"></script>
+  <script src="scripts/auth.js"></script>
+</body>
+</html>
