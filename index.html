@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>LocalBites - Live Restaurants in Trinidad</title>
+  <title>LocalBites - Restaurants & Fast Food in Trinidad</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link
@@ -34,19 +34,17 @@
 </head>
 <body>
 
-<h1>🍴 LocalBites - Restaurants in Trinidad</h1>
+<h1>🍴 LocalBites - Restaurants & Fast Food in Trinidad</h1>
 <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
 <script>
   const map = L.map('map').setView([10.6918, -61.2225], 11);
 
-  // Base map layer
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors'
   }).addTo(map);
 
-  // Overpass API query for restaurants in Trinidad
   const overpassUrl = 'https://overpass-api.de/api/interpreter';
   const query = `
     [out:json][timeout:25];
@@ -55,37 +53,40 @@
       node["amenity"="restaurant"](area.searchArea);
       way["amenity"="restaurant"](area.searchArea);
       relation["amenity"="restaurant"](area.searchArea);
+      node["amenity"="fast_food"](area.searchArea);
+      way["amenity"="fast_food"](area.searchArea);
+      relation["amenity"="fast_food"](area.searchArea);
     );
     out center;
   `;
 
-  // Fetch restaurants from Overpass
   fetch(overpassUrl, {
     method: 'POST',
     body: query
   })
   .then(response => response.json())
   .then(data => {
-    const restaurants = data.elements;
+    const places = data.elements;
 
-    restaurants.forEach(place => {
+    places.forEach(place => {
       const lat = place.lat || (place.center && place.center.lat);
       const lon = place.lon || (place.center && place.center.lon);
 
       if (lat && lon) {
-        const name = place.tags && place.tags.name ? place.tags.name : "Unnamed Restaurant";
-        const cuisine = place.tags && place.tags.cuisine ? `Cuisine: ${place.tags.cuisine}` : "Cuisine: Unknown";
+        const name = place.tags?.name || "Unnamed Place";
+        const type = place.tags?.amenity === "fast_food" ? "🍔 Fast Food" : "🍽️ Restaurant";
+        const cuisine = place.tags?.cuisine ? `Cuisine: ${place.tags.cuisine}` : "";
 
         L.marker([lat, lon]).addTo(map)
-          .bindPopup(`<strong>${name}</strong><br>${cuisine}`);
+          .bindPopup(`<strong>${name}</strong><br>${type}<br>${cuisine}`);
       }
     });
 
-    console.log(`Loaded ${restaurants.length} restaurants from OpenStreetMap.`);
+    console.log(`Loaded ${places.length} places from OpenStreetMap.`);
   })
   .catch(error => {
-    console.error("Error fetching restaurants:", error);
-    alert("Failed to load restaurant data.");
+    console.error("Error fetching data:", error);
+    alert("Failed to load food places.");
   });
 </script>
 
