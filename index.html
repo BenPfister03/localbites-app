@@ -1,83 +1,93 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>LocalBites - Explore Restaurants in Trinidad</title>
-  <meta charset="UTF-8">
+  <title>LocalBites - Live Restaurants in Trinidad</title>
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+  />
   <style>
-    body, html {
-      height: 100%;
+    html, body {
       margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
+      height: 100%;
+      font-family: sans-serif;
     }
     #map {
       height: 100%;
       width: 100%;
     }
     h1 {
-      text-align: center;
-      padding: 16px;
-      background-color: #ff7043;
+      position: absolute;
+      z-index: 1000;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #ff7043;
       color: white;
-      margin: 0;
+      padding: 10px 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
     }
   </style>
 </head>
 <body>
 
-  <h1>🍴 LocalBites - Explore Restaurants in Trinidad</h1>
-  <div id="map"></div>
+<h1>🍴 LocalBites - Restaurants in Trinidad</h1>
+<div id="map"></div>
 
-  <script>
-    let map;
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+<script>
+  const map = L.map('map').setView([10.6918, -61.2225], 11);
 
-    function initMap() {
-      const trinidad = { lat: 10.6918, lng: -61.2225 };
+  // Base map layer
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
 
-      // Create map
-      map = new google.maps.Map(document.getElementById("map"), {
-        center: trinidad,
-        zoom: 13,
-      });
+  // Overpass API query for restaurants in Trinidad
+  const overpassUrl = 'https://overpass-api.de/api/interpreter';
+  const query = `
+    [out:json][timeout:25];
+    area["name"="Trinidad and Tobago"]->.searchArea;
+    (
+      node["amenity"="restaurant"](area.searchArea);
+      way["amenity"="restaurant"](area.searchArea);
+      relation["amenity"="restaurant"](area.searchArea);
+    );
+    out center;
+  `;
 
-      // Add center marker
-      new google.maps.Marker({
-        position: trinidad,
-        map: map,
-        title: "Trinidad Center"
-      });
+  // Fetch restaurants from Overpass
+  fetch(overpassUrl, {
+    method: 'POST',
+    body: query
+  })
+  .then(response => response.json())
+  .then(data => {
+    const restaurants = data.elements;
 
-      // Use PlacesService to find restaurants
-      const service = new google.maps.places.PlacesService(map);
-      service.nearbySearch(
-        {
-          location: trinidad,
-          radius: 5000, // in meters (5km)
-          type: ['restaurant'] // can also use 'food', 'cafe', etc.
-        },
-        (results, status) => {
-          if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-            results.forEach(place => {
-              if (place.geometry && place.geometry.location) {
-                new google.maps.Marker({
-                  map: map,
-                  position: place.geometry.location,
-                  title: place.name
-                });
-              }
-            });
-          } else {
-            console.error('Places search failed:', status);
-          }
-        }
-      );
-    }
-  </script>
+    restaurants.forEach(place => {
+      const lat = place.lat || (place.center && place.center.lat);
+      const lon = place.lon || (place.center && place.center.lon);
 
-  <!-- ✅ Add &libraries=places to load Places API -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAcMIOOWXe1mlUlZgqSRZnCD9Si4yud4iU&libraries=places&callback=initMap" async defer></script>
+      if (lat && lon) {
+        const name = place.tags && place.tags.name ? place.tags.name : "Unnamed Restaurant";
+        const cuisine = place.tags && place.tags.cuisine ? `Cuisine: ${place.tags.cuisine}` : "Cuisine: Unknown";
+
+        L.marker([lat, lon]).addTo(map)
+          .bindPopup(`<strong>${name}</strong><br>${cuisine}`);
+      }
+    });
+
+    console.log(`Loaded ${restaurants.length} restaurants from OpenStreetMap.`);
+  })
+  .catch(error => {
+    console.error("Error fetching restaurants:", error);
+    alert("Failed to load restaurant data.");
+  });
+</script>
 
 </body>
 </html>
-
