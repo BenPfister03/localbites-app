@@ -457,7 +457,8 @@
         // *** End of updated estimatedPrices object ***
 
         const overpassUrl = 'https://overpass-api.de/api/interpreter';
-        const bbox = "10.0,-61.95,11.3,-60.9";
+        // Updated Bounding box coordinates to include Trinidad AND Tobago: south, west, north, east
+        const bbox = "10.0,-61.95,11.4,-60.4"; // Extended North to 11.4 and East to -60.4
         const query = `
         [out:json][timeout:45];
         (
