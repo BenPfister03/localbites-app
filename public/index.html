@@ -49,20 +49,152 @@
 
     /* --- Modified h1 selector to include ID --- */
     #header {
-      position: absolute;
-      z-index: 1000;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
+      position: fixed;
+      /* Ensure header is fixed */
+      z-index: 1001;
+      /* Above filters and map */
+      top: 0;
+      left: 0;
+      /* Align to left */
+      width: 100%;
+      /* Take full width */
       background: #ff7043;
       color: white;
-      padding: 10px 20px;
-      border-radius: 8px;
+      padding: 15px 20px;
+      /* Increased vertical padding */
+      box-sizing: border-box;
+      /* Include padding in width */
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-      display: none; /* Starts hidden */
-      opacity: 0;    /* Starts transparent */
+      display: flex;
+      /* Use flexbox for header content */
+      align-items: center;
+      /* Vertically align items */
+      justify-content: space-between;
+      /* Space between title and button */
+      height: 70px;
+      /* Adjusted height to accommodate padding */
+      display: none;
+      /* Starts hidden */
+      opacity: 0;
+      /* Starts transparent */
       transition: opacity 0.5s ease-in-out;
     }
+
+    #header h1 {
+      margin: 0;
+      /* Remove default h1 margin */
+      font-size: 26px;
+      /* Slightly increased font size */
+      font-weight: bold;
+      /* Ensured bold font weight */
+      white-space: nowrap;
+      /* Prevent text wrapping */
+      overflow: hidden;
+      /* Hide overflow */
+      text-overflow: ellipsis;
+      /* Add ellipsis if needed */
+      flex-grow: 1;
+      /* Allow title to take space */
+    }
+
+    /* *** Styles for the right-side controls (My Ratings + User) *** */
+    #header-right-controls {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      /* Space between My Ratings and User section */
+    }
+
+
+    /* *** Styles for the "My Ratings" button *** */
+    #show-rated-places-button {
+      padding: 8px 15px;
+      /* Increased padding */
+      font-size: 14px;
+      cursor: pointer;
+      background-color: #333;
+      /* Darker background */
+      color: white;
+      border: 1px solid #fff;
+      /* White border */
+      border-radius: 5px;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    #show-rated-places-button:hover {
+      background-color: #555;
+      /* Slightly lighter on hover */
+      border-color: #ddd;
+      /* Lighter border on hover */
+    }
+
+    /* *** Styles for the User Menu Container (Avatar + Username + Logout) *** */
+    #user-menu-container {
+      position: relative;
+      /* Needed for absolute positioning of logout */
+      cursor: pointer;
+      display: flex;
+      /* Arrange avatar and username in a row */
+      align-items: center;
+      /* Vertically align items */
+      /* Initially hidden until login */
+      display: none;
+    }
+
+    #user-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      /* Make it round */
+      vertical-align: middle;
+      margin-right: 8px;
+      /* Space between avatar and username */
+      border: 1px solid white;
+      /* Optional border around avatar */
+    }
+
+    #header-username {
+      color: white;
+      font-weight: bold;
+      vertical-align: middle;
+      font-size: 1em;
+      /* Keep font size consistent */
+    }
+
+    /* Styles for the Logout Option */
+    #logout-option {
+      position: absolute;
+      /* Position relative to #user-menu-container */
+      top: 45px;
+      /* Position below the avatar/username */
+      right: 0;
+      /* Align to the right edge of the container */
+      background: white;
+      color: #333;
+      padding: 8px 15px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      display: none;
+      /* Hidden by default */
+      z-index: 1002;
+      /* Above header content */
+      white-space: nowrap;
+      /* Prevent text wrap */
+      font-size: 0.9em;
+      /* Slightly smaller font */
+      text-align: center;
+      /* Center text */
+      width: 100px;
+      /* Set a width */
+      box-sizing: border-box;
+      /* Include padding and border in width */
+    }
+
+    #logout-option:hover {
+      background-color: #f0f0f0;
+      /* Light grey on hover */
+    }
+
 
     #login-container {
       display: flex;
@@ -128,31 +260,37 @@
       transition: background-color 0.3s ease, transform 0.2s;
       box-sizing: border-box;
     }
-     /* Simple style for secondary button */
+
+    /* Simple style for secondary button */
     #login-container button.secondary-btn {
-        background-color: #f0f0f0;
-        color: #555;
-        margin-top: 8px; /* Smaller gap */
+      background-color: #f0f0f0;
+      color: #555;
+      margin-top: 8px;
+      /* Smaller gap */
     }
 
     #login-container button:hover {
       background-color: #f4511e;
       transform: scale(1.02);
     }
+
     #login-container button.secondary-btn:hover {
-        background-color: #e0e0e0;
-        color: #333;
-        transform: scale(1.02); /* Keep hover effect */
+      background-color: #e0e0e0;
+      color: #333;
+      transform: scale(1.02);
+      /* Keep hover effect */
     }
 
 
     .user-location-marker {
       background: transparent;
       border: none;
-      font-size: 30px; /* Make emoji bigger */
+      font-size: 30px;
+      /* Make emoji bigger */
       line-height: 1;
       text-align: center;
-      text-shadow: 1px 1px 3px rgba(0,0,0,0.5); /* Optional shadow */
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+      /* Optional shadow */
     }
 
     .rating-container {
@@ -162,32 +300,42 @@
 
     .star-rating {
       display: inline-block;
-      font-size: 24px; /* Adjust star size */
+      font-size: 24px;
+      /* Adjust star size */
       cursor: pointer;
     }
 
     .star-rating .star {
-      color: #ddd; /* Default empty star color */
+      color: #ddd;
+      /* Default empty star color */
       display: inline-block;
       transition: all 0.2s;
-      -webkit-text-stroke: 1px #555; /* Outline */
-       paint-order: stroke fill; /* Make outline appear behind fill */
-       text-shadow: none; /* Remove browser default shadows */
+      -webkit-text-stroke: 1px #555;
+      /* Outline */
+      paint-order: stroke fill;
+      /* Make outline appear behind fill */
+      text-shadow: none;
+      /* Remove browser default shadows */
     }
 
     .star-rating .star.hover {
-      color: #ffd700; /* Gold on hover */
+      color: #ffd700;
+      /* Gold on hover */
       transform: scale(1.1);
-       -webkit-text-stroke: 1px #333; /* Darker outline on hover */
+      -webkit-text-stroke: 1px #333;
+      /* Darker outline on hover */
     }
 
     .star-rating .star.selected {
-      color: #ff9800; /* Orange when selected */
-       -webkit-text-stroke: 1px #555; /* Keep outline when selected */
+      color: #ff9800;
+      /* Orange when selected */
+      -webkit-text-stroke: 1px #555;
+      /* Keep outline when selected */
     }
 
     .star-rating .star:active {
-       transform: scale(0.95); /* Slight shrink on click */
+      transform: scale(0.95);
+      /* Slight shrink on click */
     }
 
     .rating-text {
@@ -198,25 +346,304 @@
 
     /* Style for Leaflet popups */
     .leaflet-popup-content-wrapper {
-       border-radius: 8px;
-    }
-    .leaflet-popup-content {
-       margin: 15px;
-       font-size: 14px;
-       line-height: 1.6;
-    }
-    .leaflet-popup-content b {
-       color: #333;
-       font-size: 16px;
+      border-radius: 8px;
     }
 
+    .leaflet-popup-content {
+      margin: 15px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .leaflet-popup-content b {
+      color: #333;
+      font-size: 16px;
+    }
+
+    /* Styles for the new rated places section */
+    #rated-places-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.95);
+      /* Semi-transparent white background */
+      z-index: 999;
+      /* Below the header */
+      display: none;
+      /* Initially hidden */
+      padding: 20px;
+      padding-top: 100px;
+      /* Increased padding to the top to clear the header */
+      padding-bottom: 80px;
+      /* Add padding at the bottom to prevent content being hidden by fixed button */
+      box-sizing: border-box;
+      overflow-y: auto;
+      /* Enable scrolling if content overflows */
+      color: #333;
+    }
+
+    #rated-places-container h2 {
+      text-align: center;
+      color: #ff7043;
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+
+    #rated-places-controls {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    #rated-places-controls select {
+      padding: 8px;
+      margin: 0 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+
+    #rated-places-list {
+      list-style: none;
+      padding: 0;
+      max-width: 600px;
+      /* Limit width for better readability */
+      margin: 20px auto;
+      /* Center the list */
+    }
+
+    #rated-places-list li {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      /* Allow items to wrap on smaller screens */
+    }
+
+    #rated-places-list li .place-info {
+      flex-grow: 1;
+      /* Allow name and address to take available space */
+      margin-right: 10px;
+      /* Add some space between info and rating */
+      min-width: 150px;
+      /* Ensure info block has some minimum width */
+    }
+
+    #rated-places-list li .place-info strong {
+      display: block;
+      /* Make name a block element for spacing */
+      margin-bottom: 5px;
+      /* Space below name */
+      font-size: 1.1em;
+      color: #333;
+    }
+
+    #rated-places-list li .place-info small {
+      display: block;
+      /* Make address a block element */
+      color: #666;
+      /* Slightly muted color for address */
+      font-size: 0.9em;
+      /* Smaller font size for address */
+    }
+
+
+    /* Styles for the interactive rating in the list */
+    #rated-places-list li .rating-controls {
+      display: flex;
+      /* Arrange stars and link in a row */
+      align-items: center;
+      /* Vertically center items */
+      flex-shrink: 0;
+      /* Prevent controls from shrinking */
+    }
+
+    #rated-places-list li .rating-controls .star-rating {
+      font-size: 1.2em;
+      /* Adjust star size for the list */
+      margin-right: 10px;
+      /* Space between stars and link */
+    }
+
+    /* Ensure the star class styles apply to stars in the list */
+    #rated-places-list li .rating-controls .star-rating .star {
+      font-size: 1em;
+      /* Consistent star size within the list rating */
+    }
+
+
+    #rated-places-list li .rating-controls a {
+      color: #ff7043;
+      text-decoration: none;
+    }
+
+    #rated-places-list li .rating-controls a:hover {
+      text-decoration: underline;
+    }
+
+
+    #back-to-map-button {
+      position: fixed;
+      /* Fix the position relative to the viewport */
+      bottom: 20px;
+      /* Position 20px from the bottom */
+      left: 50%;
+      /* Start from the middle horizontally */
+      transform: translateX(-50%);
+      /* Move left by half its width to center */
+      z-index: 1001;
+      /* Ensure it's above the scrollable content */
+      width: 200px;
+      padding: 10px;
+      text-align: center;
+      background-color: #ff7043;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+
+    #back-to-map-button:hover {
+      background-color: #f4511e;
+    }
+
+    /* --- Styles for the new map filters container --- */
+    #map-filters-container {
+      position: fixed;
+      /* Changed from absolute to fixed */
+      top: 70px;
+      /* Position directly below the fixed header (Adjusted from 60px to 70px to match new header height) */
+      left: 0;
+      /* Align to the left edge */
+      bottom: 0;
+      /* Extend to the bottom of the viewport */
+      z-index: 1000;
+      /* Above the map */
+      background: rgba(255, 255, 255, 0.9);
+      /* Semi-transparent background */
+      padding: 15px;
+      border-radius: 0 8px 8px 0;
+      /* Round only right corners */
+      box-shadow: 2px 0 6px rgba(0, 0, 0, 0.3);
+      /* Shadow on the right edge */
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 250px;
+      max-width: 250px;
+      font-size: 14px;
+      color: #333;
+      display: none;
+      overflow-y: auto;
+      /* Enable scrolling for filter content */
+      box-sizing: border-box;
+      /* Include padding and border in element's total width */
+    }
+
+    #map-filters-container label {
+      font-weight: bold;
+      margin-bottom: 2px;
+    }
+
+    #map-filters-container select,
+    #map-filters-container input[type="range"],
+    #map-filters-container button {
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    #map-filters-container button {
+      background-color: #ff7043;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    #map-filters-container button:hover {
+      background-color: #f4511e;
+    }
+
+    #map-filters-container button.reset-button {
+      background-color: #666;
+      margin-top: 5px;
+    }
+
+    #map-filters-container button.reset-button:hover {
+      background-color: #555;
+    }
+
+    #map-filters-container input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 8px;
+      background: #ddd;
+      outline: none;
+      opacity: 0.7;
+      transition: opacity .2s;
+      margin-top: 5px;
+      margin-bottom: 5px;
+    }
+
+    #map-filters-container input[type="range"]:hover {
+      opacity: 1;
+    }
+
+    #map-filters-container input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      background: #ff7043;
+      cursor: pointer;
+      border-radius: 50%;
+    }
+
+
+    #map-filters-container input[type="range"]:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      background: #eee;
+    }
+
+    #map-filters-container input[type="range"]:disabled::-webkit-slider-thumb {
+      background: #bbb;
+      cursor: not-allowed;
+    }
+
+
+    #map-filters-container input[type="range"]::-moz-range-thumb {
+      background: #bbb;
+      cursor: not-allowed;
+    }
+
+
+    #map-filters-container .slider-value {
+      text-align: center;
+      font-size: 0.9em;
+      color: #555;
+    }
   </style>
 </head>
 
 <body>
 
   <div id="background-carousel">
-    <img src="https://cdn.drop.media/localbites-app/4bc84626-6348-4167-a21d-0fa195782908.jpeg" class="active"/>
+    <img src="https://cdn.drop.media/localbites-app/4bc84626-6348-4167-a21d-0fa195782908.jpeg" class="active" />
     <img src="https://cdn.drop.media/localbites-app/4242a0be-ff4f-40e6-b309-2d01be3e904c.jpeg" />
     <img src="https://cdn.drop.media/localbites-app/c9f7effa-d919-4293-bf8c-1d8ccdcda269.jpeg" />
     <img src="https://cdn.drop.media/localbites-app/4e3e4c7f-3028-4e5c-a185-10e26f0706e2.jpeg" />
@@ -226,7 +653,20 @@
     <img src="https://cdn.drop.media/localbites-app/571d65b4-8105-4a72-9214-17e576bf3e17.jpeg" />
   </div>
 
-  <h1 id="header">LocalBites - Neighborhood Restaurant Explorer</h1>
+  <div id="header">
+    <h1>LocalBites - Neighborhood Restaurant Explorer</h1>
+    <div id="header-right-controls">
+      <button id="show-rated-places-button">My Ratings</button>
+      <div id="user-menu-container">
+        <img id="user-avatar" src="https://cdn.drop.media/localbites-app/default-avatar.png" alt="User Avatar">
+        <span id="header-username"></span>
+        <div id="logout-option">
+          Logout
+        </div>
+      </div>
+    </div>
+  </div>
+
 
   <div id="login-container">
     <h2>LocalBites</h2>
@@ -249,6 +689,66 @@
   </div>
 
   <div id="map"></div>
+
+  <div id="map-filters-container">
+    <h3>Filter Restaurants</h3>
+
+    <label for="map-type-filter">Restaurant Type:</label>
+    <select id="map-type-filter">
+      <option value="all">All Types</option>
+      <option value="restaurant">🍴 Restaurant</option>
+      <option value="cafe">☕ Cafe</option>
+      <option value="fast_food">🍔 Fast Food</option>
+    </select>
+
+    <label for="map-price-filter">Price Range:</label>
+    <select id="map-price-filter">
+      <option value="all">All Prices</option>
+      <option value="$">$</option>
+      <option value="$$">$$</option>
+      <option value="$$$">$$$</option>
+      <option value="$$$$">$$$$</option>
+    </select>
+
+    <label for="map-distance-slider">Distance from You:</label>
+    <input type="range" id="map-distance-slider" min="1" max="10" value="10" disabled>
+    <div id="map-distance-value" class="slider-value">Location needed for distance</div>
+    <button id="apply-map-filters-button">Apply Filters</button>
+    <button id="reset-map-filters-button" class="reset-button">Reset Filters</button>
+  </div>
+
+
+  <div id="rated-places-container">
+    <h2>Your Favourite Places</h2>
+    <div id="rated-places-loading" style="text-align: center; margin-bottom: 20px; display: none;">Loading place details...</div>
+
+    <div id="rated-places-controls">
+      <label for="price-filter">Filter by Price:</label>
+      <select id="price-filter">
+        <option value="all">All Prices</option>
+        <option value="$">$</option>
+        <option value="$$">$$</option>
+        <option value="$$$">$$$</option>
+        <option value="$$$$">$$$$</option>
+      </select>
+
+      <label for="rating-filter">Filter by Rating:</label>
+      <select id="rating-filter">
+        <option value="all">All Ratings</option>
+        <option value="5">5 Stars</option>
+        <option value="4">4 Stars & Up</option>
+        <option value="3">3 Stars & Up</option>
+        <option value="2">2 Stars & Up</option>
+        <option value="1">1 Star & Up</option>
+      </select>
+    </div>
+
+    <ul id="rated-places-list">
+      </ul>
+    </div>
+
+  <button id="back-to-map-button">Back to Map</button>
+
 
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
@@ -274,69 +774,191 @@
     // --- Global Variables ---
     let mapInstance = null;
     let mapInitialized = false;
+    // Store fetched places data to easily retrieve names and info for rated places
+    let allPlacesData = [];
+    // Store fetched user ratings (will now store unique places with latest rating)
+    let currentUserRatings = [];
+    // Promise to track the loading of allPlacesData
+    let allPlacesDataLoadedPromise = null;
+    // Store the user's current location for distance filtering
+    let userLocation = null;
+
 
     // --- UI Toggling Functions ---
     function showSignup() {
       document.getElementById('login-form').style.display = 'none';
       document.getElementById('signup-form').style.display = 'block';
     }
+
     function showLogin() {
       document.getElementById('signup-form').style.display = 'none';
       document.getElementById('login-form').style.display = 'block';
     }
 
+    function showMap() {
+      document.getElementById('rated-places-container').style.display = 'none';
+      document.getElementById('back-to-map-button').style.display = 'none'; // Hide button when rated places is shown
+      document.getElementById('map-filters-container').style.display = 'flex'; // Show map filters
+
+      document.getElementById('map').style.display = 'block';
+      // Ensure map is correctly sized after display change
+      if (mapInstance) {
+        mapInstance.invalidateSize();
+      }
+    }
+
+    async function showRatedPlaces() {
+      document.getElementById('map').style.display = 'none';
+      document.getElementById('map-filters-container').style.display = 'none'; // Hide map filters
+      const ratedPlacesContainer = document.getElementById('rated-places-container');
+      const loadingIndicator = document.getElementById('rated-places-loading');
+      const controls = document.getElementById('rated-places-controls');
+      const list = document.getElementById('rated-places-list');
+      const backButton = document.getElementById('back-to-map-button');
+
+
+      ratedPlacesContainer.style.display = 'block';
+      backButton.style.display = 'block'; // Show button when rated places are shown
+      controls.style.display = 'none'; // Hide controls while loading
+      list.innerHTML = ''; // Clear previous list
+      loadingIndicator.style.display = 'block'; // Show loading indicator
+
+
+      // Ensure place data is loaded before loading rated places
+      if (!allPlacesDataLoadedPromise) {
+        console.warn("allPlacesDataLoadedPromise is null. Attempting to load map data.");
+        // This might happen if user navigates directly to this state or on initial load issues.
+        // Triggering loadMap might help, but main data loading should ideally happen on login.
+        // For robustness, we could add a check if loadMap has *started* and wait for *that* promise.
+        // For now, rely on the promise being set by loadMap after login.
+        if (!allPlacesDataLoadedPromise) {
+          loadingIndicator.textContent = "Error: Place data loading not initiated. Please try logging in again.";
+          console.error("allPlacesDataLoadedPromise was not set. loadMap might not have been called or completed setup.");
+          backButton.style.display = 'block'; // Still show back button
+          return; // Cannot proceed without data load promise
+        }
+      }
+
+      try {
+        console.log("Waiting for allPlacesData to load...");
+        await allPlacesDataLoadedPromise;
+        console.log("allPlacesData loaded. Proceeding to load rated places.");
+
+        loadingIndicator.style.display = 'none'; // Hide loading indicator
+        controls.style.display = 'block'; // Show controls
+
+        loadRatedPlaces(); // Load and display the rated places
+      } catch (error) {
+        console.error("Error loading allPlacesData:", error);
+        loadingIndicator.textContent = "Error loading place data.";
+        backButton.style.display = 'block'; // Still show back button
+      }
+
+    }
+
+
     // --- Login Function ---
     function login() {
-      const username = document.getElementById("username").value.trim(); // Trim whitespace
+      const username = document.getElementById("username").value.trim();
+      // Trim whitespace
       const password = document.getElementById("password").value;
       if (!username || !password) {
-          alert("Please enter both username and password.");
-          return;
+        alert("Please enter both username and password.");
+        return;
       }
       // Convert username to a dummy email for Firebase Auth
       // NOTE: This assumes usernames don't contain characters invalid for email local parts.
       // Consider more robust validation or storing the actual email during signup.
-      const email = `${username}@example.com`; // Using a placeholder domain
+      const email = `${username}@example.com`;
+      // Using a placeholder domain
 
       auth.signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
-            console.log("Login successful for:", userCredential.user.email); // Log the dummy email used
+          console.log("Login successful for:", userCredential.user.email); // Log the dummy email used
 
-            const loginEl = document.getElementById("login-container");
-            loginEl.style.opacity = 0;
-            setTimeout(() => loginEl.style.display = "none", 500); // Hide after fade
+          // Fetch the username from Firestore using the UID
+          const userId = userCredential.user.uid;
+          return db.collection('users').doc(userId).get().then(doc => {
+            if (doc.exists) {
+              const username = doc.data().username;
+              console.log("Firestore username found:", username);
+              // Now update the UI with the actual username
+              document.getElementById('header-username').textContent = username;
+              document.getElementById('user-menu-container').style.display = 'flex'; // Show user section
+              document.getElementById('show-rated-places-button').style.display = 'inline-block'; // Show My Ratings button
 
-            const mapEl = document.getElementById("map");
-            mapEl.style.display = "block"; // Make map take space
-            setTimeout(() => mapEl.style.opacity = 1, 50); // Fade in map
 
-            const header = document.getElementById("header"); // Now finds the h1
-            if (header) { // Defensive check (good practice)
-                header.style.display = "block"; // Make header take space
-                setTimeout(() => header.style.opacity = 1, 50); // Fade in header
             } else {
-                console.error("Header element not found after login!");
+              console.warn("No user document found in Firestore for UID:", userId);
+              document.getElementById('header-username').textContent = 'User'; // Default name
+              document.getElementById('user-menu-container').style.display = 'flex'; // Still show user section with default name
+              document.getElementById('show-rated-places-button').style.display = 'inline-block'; // Show My Ratings button
+
             }
+            // Continue the promise chain with the original userCredential
+            return userCredential;
+          });
+        })
+        .then((userCredential) => {
+          // This part runs after the username fetch is complete (or failed)
+          const loginEl = document.getElementById("login-container");
+          loginEl.style.opacity = 0;
+          setTimeout(() => loginEl.style.display = "none", 500); // Hide after fade
+
+          const mapEl = document.getElementById("map");
+          mapEl.style.display = "block"; // Make map take space
+          const mapFiltersEl = document.getElementById('map-filters-container'); // Get map filters element
+          mapFiltersEl.style.display = "flex"; // Show map filters
 
 
-            loadMap(); // Initialize map and fetch data
+          setTimeout(() => {
+            mapEl.style.opacity = 1;
+            // loadMap() now sets the promise
+            allPlacesDataLoadedPromise = loadMap(); // Start loading map and data and store the promise
             setupRatingStars(); // Set up listeners for rating stars
+
+
+            // Initialize distance slider value display and disable it initially
+            const distanceSlider = document.getElementById('map-distance-slider');
+            const distanceValueDisplay = document.getElementById('map-distance-value');
+            distanceSlider.disabled = true; // Disable by default
+            distanceValueDisplay.textContent = `Location needed for distance`; // Initial text
+
+
+            // Add event listener for slider value change (only active when enabled)
+            distanceSlider.addEventListener('input', function() {
+              distanceValueDisplay.textContent = `${this.value} km`;
+            });
+
+
+          }, 50); // Fade in map
+
+          const header = document.getElementById("header"); // Now finds the h1
+          if (header) { // Defensive check (good practice)
+            header.style.display = "flex"; // Use flex display
+            setTimeout(() => header.style.opacity = 1, 50); // Fade in header
+          } else {
+            console.error("Header element not found after login!");
+          }
+
+
         })
         .catch(error => {
-            console.error("Login failed:", error.code, error.message); // Log specific error code
-            let message = "Login failed. Please check your credentials.";
-            // Provide more specific feedback based on error codes
-            if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-                 message = "Invalid username or password.";
-            } else if (error.code === 'auth/invalid-email') {
-                 message = "Invalid username format used for login."; // More accurate message
-            } else if (error.code === 'auth/too-many-requests') {
-                message = "Too many login attempts. Please try again later.";
-            }
-             else {
-                 message = "An error occurred during login. Please try again."; // Generic fallback
-            }
-            alert(message);
+          console.error("Login failed:", error.code, error.message); // Log specific error code
+          let message = "Login failed. Please check your credentials.";
+          // Provide more specific feedback based on error codes
+          if (error.code === 'auth/user-not-found' ||
+            error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+            message = "Invalid username or password.";
+          } else if (error.code === 'auth/invalid-email') {
+            message = "Invalid username format used for login."; // More accurate message
+          } else if (error.code === 'auth/too-many-requests') {
+
+            message = "Too many login attempts. Please try again later.";
+          } else {
+            message = "An error occurred during login. Please try again."; // Generic fallback
+          }
+          alert(message);
         });
     }
 
@@ -365,8 +987,8 @@
       }
       // Basic check for spaces or invalid characters in username if needed
       if (/\s/.test(username) || !/^[a-zA-Z0-9_.-]+$/.test(username)) {
-          alert("Username can only contain letters, numbers, underscores (_), periods (.), and hyphens (-).");
-          return;
+        alert("Username can only contain letters, numbers, underscores (_), periods (.), and hyphens (-).");
+        return;
       }
 
 
@@ -377,7 +999,8 @@
         .then(snapshot => {
           if (!snapshot.empty) {
             // Username already exists, throw a specific error to catch later
-            throw new Error('username-exists');
+            throw new
+            Error('username-exists');
           }
 
           // If username is unique, proceed to create the Firebase Auth user
@@ -385,6 +1008,7 @@
           // or ideally, collect a real email address.
           // Using a consistent dummy email based on username:
           const dummyEmail = `${username}@example.com`;
+
           return auth.createUserWithEmailAndPassword(dummyEmail, password);
         })
         .then(userCredential => {
@@ -404,6 +1028,7 @@
           // Clear signup form fields
           document.getElementById('signup-username').value = '';
           document.getElementById('signup-password').value = '';
+
           document.getElementById('signup-confirm-password').value = '';
         })
         .catch(error => {
@@ -414,82 +1039,139 @@
           } else if (error.code === 'auth/email-already-in-use') {
             // This implies the *dummy* email is somehow already in use,
             // which likely means the username is taken if using the username@example.com pattern.
-             message = "This username might already be registered.";
+            message = "This username might already be registered.";
           } else if (error.code === 'auth/weak-password') {
             message = "Password is too weak. It must be at least 6 characters long.";
           } else if (error.code === 'auth/invalid-email') {
-             message = "The username format is invalid for creating an account.";
+            message = "The username format is invalid for creating an account.";
           }
           alert(message);
         });
     }
 
+    // --- Logout Function ---
+    function logout() {
+      auth.signOut().then(() => {
+        console.log("User signed out successfully.");
+        alert("You have been logged out.");
+        // Reset UI to show login screen
+        document.getElementById('map').style.display = 'none';
+        document.getElementById('map-filters-container').style.display = 'none';
+        document.getElementById('rated-places-container').style.display = 'none';
+        document.getElementById('back-to-map-button').style.display = 'none';
+        document.getElementById('header').style.display = 'none'; // Hide header on logout
+        document.getElementById('user-menu-container').style.display = 'none'; // Hide user section
+        document.getElementById('logout-option').style.display = 'none'; // Hide logout option
+
+        const loginEl = document.getElementById("login-container");
+        loginEl.style.display = "flex"; // Show login form
+        setTimeout(() => loginEl.style.opacity = 1, 50); // Fade in login form
+
+        // Clear user-specific data/UI
+        document.getElementById('header-username').textContent = ''; // Clear username
+        document.getElementById('show-rated-places-button').style.display = 'none'; // Hide My Ratings button
+        allPlacesData = []; // Clear map data
+        currentUserRatings = []; // Clear ratings
+        mapInitialized = false; // Reset map flag
+        if (mapInstance) {
+          mapInstance.remove(); // Remove map instance to clear layers/markers
+          mapInstance = null; // Clear map instance
+        }
+        allPlacesDataLoadedPromise = null; // Reset promise
+        userLocation = null; // Clear user location
+
+
+      }).catch((error) => {
+        console.error("Error signing out:", error);
+        alert("Failed to log out. Please try again.");
+      });
+    }
+
 
     // --- Rating Stars Interaction Setup ---
     function setupRatingStars() {
-        // Use event delegation on the body for dynamically added popups
-        document.body.addEventListener('click', function (e) {
-            // Check if the clicked element is a star inside a rating container
-            if (e.target.classList.contains('star') && e.target.closest('.star-rating')) {
-                const ratingContainer = e.target.closest('.star-rating');
-                const placeId = ratingContainer.getAttribute('data-place-id');
-                const rating = parseInt(e.target.getAttribute('data-value'));
+      // Use event delegation on the body for dynamically added popups
+      document.body.addEventListener('click', function(e) {
+        // Check if the clicked element is a star inside a rating container
+        if (e.target.classList.contains('star') && e.target.closest('.star-rating')) {
 
-                if (!placeId || isNaN(rating)) {
-                    console.error("Missing placeId or invalid rating value from star element.");
-                    return;
-                }
+          const ratingContainer = e.target.closest('.star-rating');
+          const placeId = ratingContainer.getAttribute('data-place-id');
+          const rating = parseInt(e.target.getAttribute('data-value'));
 
-                // Update the visual state of stars in this specific container
-                const stars = ratingContainer.querySelectorAll('.star');
-                stars.forEach((star, index) => {
-                    star.classList.toggle('selected', index < rating);
-                    star.classList.remove('hover'); // Remove hover effect after clicking
-                });
+          if (!placeId || isNaN(rating)) {
+            console.error("Missing placeId or invalid rating value from star element.");
 
-                // Update the rating text (optional)
-                const ratingText = ratingContainer.nextElementSibling; // Assumes text div is immediately after
-                if(ratingText && ratingText.classList.contains('rating-text')) {
-                   ratingText.textContent = `Your rating: ${rating} ★`;
-                }
+            return;
+          }
 
-                // Submit the rating to Firestore
-                submitRating(placeId, rating);
-            }
-        });
+          // Update the visual state of stars in this specific container
+          const stars = ratingContainer.querySelectorAll('.star');
+          stars.forEach((star, index) => {
 
-        // Handle hover effects using event delegation
-        document.body.addEventListener('mouseover', function (e) {
-             if (e.target.classList.contains('star') && e.target.closest('.star-rating')) {
-                const ratingContainer = e.target.closest('.star-rating');
-                const hoverValue = parseInt(e.target.getAttribute('data-value'));
-                if (isNaN(hoverValue)) return;
+            star.classList.toggle('selected', index < rating);
+            star.classList.remove('hover');
+            // Remove hover effect after clicking
+          });
+          // Update the rating text (optional) - This is primarily for map popups
+          const ratingText = ratingContainer.nextElementSibling;
+          // Assumes text div is immediately after
+          if (ratingText && ratingText.classList.contains('rating-text')) {
+            ratingText.textContent = `Your rating: ${rating} ★`;
+          }
 
-                const stars = ratingContainer.querySelectorAll('.star');
-                stars.forEach((star, index) => {
-                    // Add hover class up to the hovered star
-                    star.classList.toggle('hover', index < hoverValue);
-                });
-            }
-        });
+          // Submit the rating to Firestore
+          submitRating(placeId, rating);
 
-        // Clear hover effects when mouse leaves the rating container
-        document.body.addEventListener('mouseout', function (e) {
-            if (e.target.classList.contains('star') && e.target.closest('.star-rating')) {
-                 const ratingContainer = e.target.closest('.star-rating');
-                 // Check if the mouse is moving to another star within the same container or leaving entirely
-                 if (!ratingContainer.contains(e.relatedTarget)) {
-                      const stars = ratingContainer.querySelectorAll('.star');
-                      stars.forEach(star => star.classList.remove('hover'));
-                 }
-            } else if (e.target.classList.contains('star-rating')) {
-                 // Handle leaving the container itself
-                  if (!e.target.contains(e.relatedTarget)) {
-                      const stars = e.target.querySelectorAll('.star');
-                      stars.forEach(star => star.classList.remove('hover'));
-                  }
-            }
-        });
+          // *** Update the visual state of stars in the rated places list item ***
+          // Find the corresponding list item and update its stars
+          const listItemRatingContainer = document.querySelector(`#rated-places-list li .star-rating[data-place-id="${placeId}"]`);
+          if (listItemRatingContainer) {
+            const listItemStars = listItemRatingContainer.querySelectorAll('.star');
+            listItemStars.forEach((star, index) => {
+              star.classList.toggle('selected', index < rating);
+              star.classList.remove('hover'); // Ensure hover is removed
+            });
+          }
+        }
+      });
+
+      // Handle hover effects using event delegation
+      document.body.addEventListener('mouseover', function(e) {
+        if (e.target.classList.contains('star') && e.target.closest('.star-rating')) {
+          const ratingContainer = e.target.closest('.star-rating');
+          const hoverValue = parseInt(e.target.getAttribute('data-value'));
+          if (isNaN(hoverValue)) return;
+
+
+          const stars = ratingContainer.querySelectorAll('.star');
+          stars.forEach((star, index) => {
+            // Add hover class up to the hovered star
+            star.classList.toggle('hover', index < hoverValue);
+
+          });
+        }
+      });
+      // Clear hover effects when mouse leaves the rating container
+      document.body.addEventListener('mouseout', function(e) {
+        if (e.target.classList.contains('star') && e.target.closest('.star-rating')) {
+          const ratingContainer = e.target.closest('.star-rating');
+          // Check if the mouse is moving to another star within the same container or leaving entirely
+
+          if (!ratingContainer.contains(e.relatedTarget)) {
+            const stars = ratingContainer.querySelectorAll('.star');
+            stars.forEach(star => star.classList.remove('hover'));
+          }
+        } else if (e.target.classList.contains('star-rating')) {
+
+          // Handle leaving the container itself
+          if (!e.target.contains(e.relatedTarget)) {
+            const stars = e.target.querySelectorAll('.star');
+            stars.forEach(star => star.classList.remove('hover'));
+          }
+
+        }
+      });
     }
 
 
@@ -502,12 +1184,12 @@
         // Optionally, visually reset the stars if login is required
         const ratingContainer = document.querySelector(`.star-rating[data-place-id="${placeId}"]`);
         if (ratingContainer) {
-            const stars = ratingContainer.querySelectorAll('.star');
-            stars.forEach(star => star.classList.remove('selected', 'hover'));
-            const ratingText = ratingContainer.nextElementSibling;
-             if(ratingText && ratingText.classList.contains('rating-text')) {
-                 ratingText.textContent = `Rate this place`;
-             }
+          const stars = ratingContainer.querySelectorAll('.star');
+          stars.forEach(star => star.classList.remove('selected', 'hover'));
+          const ratingText = ratingContainer.nextElementSibling;
+          if (ratingText && ratingText.classList.contains('rating-text')) {
+            ratingText.textContent = `Rate this place`;
+          }
         }
         return;
       }
@@ -521,363 +1203,778 @@
       const ratingDocRef = db.collection("ratings").doc(`${user.uid}_${placeId}`);
 
       console.log(`Attempting to save rating: User ${user.uid}, Place ${placeId}, Rating ${rating}`);
-
       ratingDocRef.set({
-        userId: user.uid,
-        placeId: placeId.toString(), // Ensure placeId is stored as string if it comes from OSM id
-        rating: rating,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp() // Use server time
-      }, { merge: true }) // Use merge: true to update if exists, create if not
-      .then(() => {
-        console.log("Rating saved successfully for place:", placeId, "Rating:", rating);
-        // Optionally provide user feedback e.g., inside the popup
-      })
-      .catch(err => {
-        console.error("Error saving rating:", err);
-        alert("Failed to save your rating. Please try again. Error: " + err.message);
-      });
+          userId: user.uid,
+          placeId: placeId.toString(), // Ensure placeId is stored as string if it comes from OSM id
+          rating: rating,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp() // Use server time
+        }, {
+          merge: true
+        }) // Use merge: true to update if exists, create if not
+        .then(() => {
+          console.log("Rating saved successfully for place:", placeId, "Rating:", rating);
+
+          // Update the currentUserRatings array with the new rating
+          const ratedPlaceIndex = currentUserRatings.findIndex(p => p.placeId === placeId);
+          if (ratedPlaceIndex !== -1) {
+            currentUserRatings[ratedPlaceIndex].rating = rating;
+            // Re-display the list to reflect the change visually
+            // Only re-display if the rated places list is currently visible
+            if (document.getElementById('rated-places-container').style.display !== 'none') {
+              displayFilteredPlaces(currentUserRatings);
+            }
+
+          }
+
+
+          // Optionally provide user feedback e.g., a small message near the stars
+          // No need to reload all ratings here, as the visual update in the popup is sufficient.
+        })
+        .catch(err => {
+          console.error("Error saving rating:", err);
+          alert("Failed to save your rating. Please try again. Error: " + err.message);
+        });
     }
 
     // --- Get User Location ---
     function getUserLocation(mapToUse) {
-        if (!mapToUse) {
-            console.error("Map instance not available for getUserLocation");
-            return;
-        }
-        if (navigator.geolocation) {
-            console.log("Attempting to get user location...");
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const userLat = position.coords.latitude;
-                    const userLng = position.coords.longitude;
-                    console.log(`Location found: Lat: ${userLat}, Lng: ${userLng}`);
+      if (!mapToUse) {
+        console.error("Map instance not available for getUserLocation");
+        return;
+      }
+      const distanceSlider = document.getElementById('map-distance-slider');
+      const distanceValueDisplay = document.getElementById('map-distance-value');
 
-                    const userIcon = L.divIcon({
-                        className: 'user-location-marker', // Use CSS class for styling
-                        html: '📍', // You are here emoji
-                        iconSize: [40, 40],      // Size of the icon
-                        iconAnchor: [20, 40],    // Point of the icon which will correspond to marker's location (bottom center)
-                        popupAnchor: [0, -40]   // Point from which the popup should open relative to the iconAnchor
-                    });
 
-                    L.marker([userLat, userLng], { icon: userIcon })
-                        .addTo(mapToUse)
-                        .bindPopup("<b>You are here!</b>")
-                        .openPopup(); // Open popup immediately
+      if (navigator.geolocation) {
+        console.log("Attempting to get user location...");
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const userLat = position.coords.latitude;
+            const userLng = position.coords.longitude;
+            console.log(`Location found: Lat: ${userLat}, Lng: ${userLng}`);
+            userLocation = {
+              lat: userLat,
+              lng: userLng
+            }; // Store user location
 
-                    mapToUse.setView([userLat, userLng], 14); // Center map and zoom in
-                },
-                (error) => {
-                    console.error("Geolocation error:", error.code, error.message);
-                    const defaultLat = 10.6667; // Port of Spain Latitude
-                    const defaultLng = -61.5167; // Port of Spain Longitude
-                    let alertMsg = "Could not get your location.";
+            // *** Enable the distance slider and update display on successful geolocation ***
+            distanceSlider.disabled = false;
+            distanceSlider.value = 10; // Set a default initial value, e.g., max range
+            distanceValueDisplay.textContent = `${distanceSlider.value} km`;
 
-                    switch (error.code) {
-                        case error.PERMISSION_DENIED:
-                            alertMsg += " Permission denied. Showing default map area (Port of Spain).";
-                            console.log("User denied Geolocation. Setting default view.");
-                            break;
-                        case error.POSITION_UNAVAILABLE:
-                            alertMsg += " Location information is unavailable. Showing default map area (Port of Spain).";
-                             console.log("Location unavailable. Setting default view.");
-                            break;
-                        case error.TIMEOUT:
-                            alertMsg += " The request to get user location timed out. Showing default map area (Port of Spain).";
-                             console.log("Geolocation timeout. Setting default view.");
-                            break;
-                        default: // Including error.UNKNOWN_ERROR
-                            alertMsg += " An unknown error occurred. Showing default map area (Port of Spain).";
-                             console.log("Unknown geolocation error. Setting default view.");
-                            break;
-                    }
-                    // Only alert if it wasn't a denial, as denials might be intentional.
-                    if (error.code !== error.PERMISSION_DENIED) {
-                         alert(alertMsg);
-                    }
-                    mapToUse.setView([defaultLat, defaultLng], 13); // Set default view
-                },
-                { // Geolocation options
-                    enableHighAccuracy: true, // Try for more accuracy
-                    timeout: 10000,          // Wait 10 seconds
-                    maximumAge: 0            // Don't use a cached position
-                }
-            );
-        } else {
-            console.log("Geolocation is not supported by this browser.");
-            alert("Geolocation is not supported by this browser. Showing default map area (Port of Spain).");
+
+            const userIcon = L.divIcon({
+              className: 'user-location-marker', // Use CSS class for styling
+              html: '📍', // You are here emoji
+              iconSize: [40, 40],
+              // Size of the icon
+              iconAnchor: [20, 40], // Point of the icon which will correspond to marker's location (bottom center)
+              popupAnchor: [0, -40] // Point from which the popup should open relative to the iconAnchor
+
+            });
+
+            L.marker([userLat, userLng], {
+                icon: userIcon
+              })
+              .addTo(mapToUse)
+              .bindPopup("<b>You are here!</b>")
+              .openPopup();
+            // Open popup immediately
+
+            mapToUse.setView([userLat, userLng], 14);
+            // Center map and zoom in
+          },
+          (error) => {
+            console.error("Geolocation error:", error.code, error.message);
             const defaultLat = 10.6667; // Port of Spain Latitude
-            const defaultLng = -61.5167; // Port of Spain Longitude
-            mapToUse.setView([defaultLat, defaultLng], 13); // Set default view
-        }
+            const defaultLng = -61.5167;
+            // Port of Spain Longitude
+            let alertMsg = "Could not get your location.";
+            switch (error.code) {
+              case error.PERMISSION_DENIED:
+                alertMsg += " Permission denied. Showing default map area (Port of Spain).";
+                console.log("User denied Geolocation. Setting default view.");
+                // *** Keep slider disabled on permission denied ***
+                distanceSlider.disabled = true;
+                distanceValueDisplay.textContent = `Location access denied`;
+                break;
+              case error.POSITION_UNAVAILABLE:
+                alertMsg += " Location information is unavailable. Showing default map area (Port of Spain).";
+                console.log("Location unavailable. Setting default view.");
+                // *** Keep slider disabled on error ***
+                distanceSlider.disabled = true;
+                distanceValueDisplay.textContent = `Location unavailable`;
+                break;
+              case error.TIMEOUT:
+                alertMsg += " The request to get user location timed out. Showing default map area (Port of Spain).";
+                console.log("Geolocation timeout. Setting default view.");
+                // *** Keep slider disabled on timeout ***
+                distanceSlider.disabled = true;
+                distanceValueDisplay.textContent = `Location request timed out`;
+                break;
+              default: // Including error.UNKNOWN_ERROR
+                alertMsg += " An unknown error occurred. Showing default map area (Port of Spain).";
+                console.log("Unknown geolocation error. Setting default view.");
+                // *** Keep slider disabled on other errors ***
+                distanceSlider.disabled = true;
+                distanceValueDisplay.textContent = `Location error`;
+                break;
+            }
+            // Only alert if it wasn't a denial, as denials might be intentional.
+            if (error.code !== error.PERMISSION_DENIED) {
+              alert(alertMsg);
+            }
+            mapToUse.setView([defaultLat, defaultLng], 13);
+            // Set default view
+            userLocation = {
+              lat: defaultLat,
+              lng: defaultLng
+            }; // Store default location if geolocation fails
+          }, { // Geolocation options
+            enableHighAccuracy: true, // Try for more accuracy
+            timeout: 10000, // Wait 10 seconds
+
+            maximumAge: 0 // Don't use a cached position
+          }
+        );
+      } else {
+        console.log("Geolocation is not supported by this browser.");
+        alert("Geolocation is not supported by this browser. Showing default map area (Port of Spain).");
+        const defaultLat = 10.6667;
+        // Port of Spain Latitude
+        const defaultLng = -61.5167;
+        // Port of Spain Longitude
+        mapToUse.setView([defaultLat, defaultLng], 13);
+        // Set default view
+        userLocation = {
+          lat: defaultLat,
+          lng: defaultLng
+        }; // Store default location if geolocation not supported
+        // *** Keep slider disabled if geolocation is not supported ***
+        distanceSlider.disabled = true;
+        distanceValueDisplay.textContent = `Geolocation not supported`;
+      }
     }
+
+    // --- Function to calculate distance between two points (Haversine formula) ---
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371; // Radius of the earth in km
+      const dLat = deg2rad(lat2 - lat1);
+      const dLon = deg2rad(lon2 - lon1);
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const d = R * c; // Distance in km
+      return d;
+    }
+
+    function deg2rad(deg) {
+      return deg * (Math.PI / 180);
+    }
+
+
+    // --- Function to get estimated cost ---
+    function getEstimatedCost(placeName, amenityType) {
+      // Define specific names that should get $$$$ (case-insensitive check)
+      const fourDollarNames = [
+        "buzo osteria italiana",
+        "krave",
+        "krave restaurant", // Added variation
+        "texas de brazil",
+        "rizzoni's",
+        "rizzoni's ristorante italiano", // Added variation
+        "rizonni's" // Added variation
+        // Add other $$$$ names here in lowercase if needed
+      ];
+
+      const normalizedName = typeof placeName === 'string' ? placeName.trim() : '';
+      const lowerNormalizedName = normalizedName.toLowerCase(); // Convert to lowercase for comparison
+      let cost;
+
+      // Check if the lowercase normalized name is in the list of $$$$ names
+      if (fourDollarNames.includes(lowerNormalizedName)) {
+        cost = "$$$$";
+      } else {
+        // Check the estimatedPrices map for other specific prices (using original normalized name)
+        const estimatedPrices = {
+          "Luce": "$$$",
+          "Chaud Cafe & Wine Bar": "$$$",
+          "The Meena House": "$$$",
+          "Seahorse Restaurant & Bar": "$$$",
+          "Bottles And Bites": "$$$",
+          "Sails Restaurant & Pub": "$$",
+          "North Sea Restaurant Co. Ltd.": "$$",
+          "Luna Restaurant": "$$",
+          "The Deck": "$$",
+          "Big G Gyros": "$$",
+          "Kebbab & Shawarma Station": "$$",
+          "Burger Joint": "$$",
+          "D Ultimate StrEAT Vibe": "$$",
+          "Pizza Hut": "$$",
+          "Mario's Pizza": "$$",
+          "Rituals Coffee House": "$$",
+          "Subway": "$$",
+          "Dairy Queen": "$$",
+          "Mr Chows Smoke House": "$$",
+          "Burger King": "$$",
+          "McDonald's": "$$",
+          "KO COMBOS": "$",
+          "Royal Castle": "$",
+        };
+
+        if (estimatedPrices.hasOwnProperty(normalizedName)) {
+          cost = estimatedPrices[normalizedName];
+        } else {
+          // Default based on amenity type if not in specific lists
+          switch (amenityType) {
+            case "fast_food":
+              cost = "$";
+              break;
+            case "cafe":
+              cost = "$$";
+              break;
+            case "food_court":
+              cost = "$$";
+              break;
+            case "restaurant":
+            default:
+              cost = "$$$";
+              break;
+          }
+        }
+      }
+
+      return cost;
+    }
+
 
     // --- Load Map and Data ---
     function loadMap() {
-        if (mapInitialized) {
-            console.warn("Map already initialized. Skipping re-initialization.");
-            // If needed, you could clear existing markers here before adding new ones
-            // Or, just return if the map state should persist across logins/actions
-            return;
-        }
+      if (mapInitialized) {
+        console.warn("Map already initialized. Skipping re-initialization.");
+        return Promise.resolve();
+      }
 
-        console.log("Initializing map...");
-        const defaultLat = 10.6667; // Port of Spain Latitude
-        const defaultLng = -61.5167; // Port of Spain Longitude
-        try {
-             mapInstance = L.map('map', { // Add options if needed
-                // Example: Set min/max zoom
-                // minZoom: 10,
-                // maxZoom: 18
-            }).setView([defaultLat, defaultLng], 13); // Default view before geolocation
-             mapInitialized = true; // Set flag after successful map creation
-             console.log("Map instance created.");
-        } catch (e) {
-             console.error("Failed to initialize Leaflet map:", e);
-             alert("Error creating the map display.");
-             return; // Stop if map fails
-        }
+      console.log("Initializing map...");
+      const defaultLat = 10.6667; // Port of Spain Latitude
+      const defaultLng = -61.5167; // Port of Spain Longitude
+
+      try {
+        mapInstance = L.map('map', {
+          center: [defaultLat, defaultLng],
+          zoom: 13,
+          zoomControl: false // Disable default zoom control
+        });
+        mapInitialized = true;
+        console.log("Map instance created with default view and zoom control disabled.");
+      } catch (e) {
+        console.error("Failed to initialize Leaflet map:", e);
+        alert("Error creating the map display.");
+        return Promise.reject("Map initialization failed");
+      }
+
+      // Add Tile Layer (Map background)
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19,
+        minZoom: 5
+      }).addTo(mapInstance);
+      console.log("Tile layer added.");
+
+      // Add zoom control to the top right
+      L.control.zoom({
+        position: 'topright'
+      }).addTo(mapInstance);
+      console.log("Zoom control added to topright.");
 
 
-        // Add Tile Layer (Map background)
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-            maxZoom: 19, // Standard max zoom for OSM
-            minZoom: 5 // Prevent zooming out too far if desired
-        }).addTo(mapInstance);
-        console.log("Tile layer added.");
+      // Get user's location and center map (async)
+      getUserLocation(mapInstance);
 
-        // Get user's location and center map (async)
-        getUserLocation(mapInstance);
-
-        // --- Price Estimation Logic ---
-        // Define estimated price ranges (customize as needed)
-        // Key: Exact name from OpenStreetMap data (case-sensitive usually)
-        // Value: '$', '$$', '$$$', '$$$$'
-         const estimatedPrices = {
-             // High-end ($$$$) - Note: Adjusted $$$ from original to $$$$ based on code logic later
-            "Buzo Osteria Italiana": "$$$", // Will become $$$$
-            "Krave": "$$$",                 // Will become $$$$
-            "Luce": "$$$",                  // Will become $$$$
-            "Chaud Cafe & Wine Bar": "$$$", // Will become $$$$
-            "The Meena House": "$$$",       // Will become $$$$
-            "Seahorse Restaurant & Bar": "$$$", // Will become $$$$
-            "Bottles And Bites": "$$$",     // Will become $$$$
-
-            // Mid-range ($$$) - Default for 'restaurant' amenity
-             // Add specific overrides if known
-
-            // Lower Mid-range ($$) - Default for 'cafe' amenity
-            "Sails Restaurant & Pub": "$$",
-            "North Sea Restaurant Co. Ltd.": "$$",
-            "Luna Restaurant": "$$",
-            "The Deck": "$$",
-            "Big G Gyros": "$$",
-            "Kebbab & Shawarma Station": "$$",
-            "Burger Joint": "$$",
-            "D Ultimate StrEAT Vibe": "$$",
-            "Pizza Hut": "$$",
-            "Mario's Pizza": "$$",
-            "Rituals Coffee House": "$$",
-            "Subway": "$$",         // Explicitly set
-            "Dairy Queen": "$$",    // Explicitly set
-            "Mr Chows Smoke House": "$$", // Explicitly set
-            "Burger King": "$$",    // Explicitly set
-            "McDonald's": "$$",   // Explicitly set
-            // Add other known $$ places
-
-             // Budget ($) - Default for 'fast_food' amenity
-            "KO COMBOS": "$",
-            "Royal Castle": "$",
-            // Add other known $ places
-         };
-
-        // --- Fetch Data from OpenStreetMap using Overpass API ---
-        const overpassUrl = 'https://overpass-api.de/api/interpreter';
-        // Bounding box for Trinidad AND Tobago [South, West, North, East]
-        // Adjusted slightly for broader coverage including Tobago coasts
-        const bbox = "10.0,-61.95,11.4,-60.4";
-        const query = `
+      // --- Fetch Data from OpenStreetMap using Overpass API ---
+      const overpassUrl = 'https://overpass-api.de/api/interpreter';
+      // Bounding box for Trinidad AND Tobago [South, West, North, East]
+      // Adjusted slightly for broader coverage including Tobago coasts
+      const bbox = "10.0,-61.95,11.4,-60.4";
+      const query = `
         [out:json][timeout:45];
         (
           // Query for nodes, ways, and relations matching amenities
-          node["amenity"~"^(restaurant|fast_food|food_court|cafe)$"](${bbox});
-          way["amenity"~"^(restaurant|fast_food|food_court|cafe)$"](${bbox});
-          relation["amenity"~"^(restaurant|fast_food|food_court|cafe)$"](${bbox});
+          node["amenity"~"^(restaurant|fast_food|food_court|cafe)$"]["name"](${bbox}); /* Filter for name here */
+          way["amenity"~"^(restaurant|fast_food|food_court|cafe)$"]["name"](${bbox});   /* Filter for name here */
+          relation["amenity"~"^(restaurant|fast_food|food_court|cafe)$"]["name"](${bbox}); /* Filter for name here */
         );
         // Output geometry for ways/relations and standard output for nodes
-        out center; // Use 'center' for ways/relations to get a single point
+        out center;
+        // Use 'center' for ways/relations to get a single point
         >;
         out skel qt; // Standard output format
         `;
 
-        console.log("Fetching data from Overpass API...");
-        fetch(overpassUrl, {
-            method: 'POST',
-            // Use URLSearchParams for cleaner body construction
-            body: new URLSearchParams({ data: query })
+      console.log("Fetching data from Overpass API...");
+      // Return the promise chain
+      return fetch(overpassUrl, {
+          method: 'POST',
+          // Use URLSearchParams for cleaner body construction
+          body: new URLSearchParams({
+            data: query
+          })
         })
         .then(response => {
-            if (!response.ok) {
-                // Throw an error with status text for better debugging
-                throw new Error(`Overpass API request failed: ${response.status} ${response.statusText}`);
-            }
-            return response.json(); // Parse JSON response
+          if (!response.ok) {
+            // Throw an error with status text for better debugging
+            throw new Error(`Overpass API request failed: ${response.status} ${response.statusText}`);
+          }
+          return response.json(); // Parse JSON response
         })
         .then(data => {
-            console.log("Overpass Data Received:", data);
-            if (!data || !data.elements) {
-                 console.warn("No elements found in Overpass response.");
-                 return;
-            }
+          console.log("Overpass Data Received:", data);
+          if (!data || !data.elements) {
+            console.warn("No elements found in Overpass response.");
+            allPlacesData = []; // Ensure it's an empty array
+            return; // Resolve with no data if empty
+          }
+          allPlacesData = data.elements; // Store the fetched data globally
 
-            const places = data.elements;
-            const markers = L.layerGroup().addTo(mapInstance); // Create a layer group for markers
-            let markersAdded = 0;
-            let skippedCount = 0;
+          // Now that data is loaded, apply filters to display initial markers
+          applyMapFilters();
 
-            places.forEach(place => {
-                let lat, lon;
-                const tags = place.tags || {}; // Ensure tags object exists
-                const amenityType = tags.amenity;
-
-                // Determine coordinates: use node coords or center of way/relation
-                if (place.type === 'node' && place.lat && place.lon) {
-                    lat = place.lat;
-                    lon = place.lon;
-                } else if (place.center && place.center.lat && place.center.lon) { // For ways/relations with 'out center;'
-                    lat = place.center.lat;
-                    lon = place.center.lon;
-                } else if (place.type === 'way' || place.type === 'relation') {
-                    // Fallback if 'out center' didn't work or wasn't used, try to find a node within it
-                    // This is more complex and might require another query or careful parsing
-                    // console.log(`Skipping way/relation ${place.id} without center coordinates.`);
-                    skippedCount++;
-                    return; // Skip this element for now if no simple coordinates
-                } else {
-                     // console.log(`Skipping element ${place.id} of type ${place.type} without coordinates.`);
-                     skippedCount++;
-                     return; // Skip if no coordinates found
-                }
-
-
-                // Ensure we have coordinates and an amenity type
-                if (lat && lon && amenityType) {
-                    const name = tags.name || `Unnamed ${amenityType.replace('_', ' ')}`; // Handle missing names
-                    const placeIdentifier = place.id; // Use OSM ID as a unique identifier
-
-                    // --- Determine Display Type ---
-                    let displayType;
-                    switch(amenityType) {
-                        case "fast_food": displayType = "🍔 Fast Food"; break;
-                        case "food_court": displayType = "🍽️ Food Court"; break;
-                        case "cafe": displayType = "☕ Cafe"; break;
-                        case "restaurant":
-                        default: displayType = "🍴 Restaurant"; break; // Default to restaurant
-                    }
-
-                    // --- Determine Cost ---
-                    let cost;
-                    const normalizedName = name.trim(); // Trim whitespace from name for matching
-                    if (estimatedPrices.hasOwnProperty(normalizedName)) {
-                        cost = estimatedPrices[normalizedName];
-                        // Apply the $$$ -> $$$$ rule specifically here if needed by logic
-                        // Example: if (cost === "$$$") cost = "$$$$"; - but your current logic handles this below
-                    } else {
-                        // Fallback cost based on amenity type if not in specific list
-                        switch(amenityType) {
-                            case "fast_food": cost = "$"; break;
-                            case "cafe": cost = "$$"; break;
-                             case "food_court": cost = "$$"; break; // Assign default for food court
-                            case "restaurant":
-                            default: cost = "$$$"; break; // Default for restaurant
-                        }
-                    }
-                    // *** IMPORTANT: Apply the transformation rule AFTER lookup/default ***
-                    // This matches the logic in your provided `estimatedPrices` where $$$ was used as the key
-                    // but the intent seemed to display it as $$$$ for certain places.
-                     if (estimatedPrices.hasOwnProperty(normalizedName) && estimatedPrices[normalizedName] === "$$$") {
-                         cost = "$$$$";
-                     }
-
-
-                    // --- Create Popup Content ---
-                    // Fetch existing rating if possible (more advanced, requires async fetch per marker)
-                    // For now, just include the rating stars structure.
-                    const popupContent = `
-                        <b>${name}</b> <br>
-                        ${displayType} - <span style="color: green; font-weight: bold;">${cost}</span>
-                        <div class="rating-container">
-                            <div class="star-rating" data-place-id="${placeIdentifier}">
-                                <span class="star" data-value="1">★</span><span class="star" data-value="2">★</span><span class="star" data-value="3">★</span><span class="star" data-value="4">★</span><span class="star" data-value="5">★</span>
-                            </div>
-                            <div class="rating-text">Rate this place</div>
-                        </div>
-                    `;
-
-                    // --- Create and Add Marker ---
-                     try {
-                        const marker = L.marker([lat, lon])
-                                     .bindPopup(popupContent);
-                        markers.addLayer(marker); // Add to the layer group
-                        markersAdded++;
-                    } catch (markerError) {
-                         console.error(`Error creating marker for ${name} (${placeIdentifier}):`, markerError);
-                         skippedCount++;
-                    }
-
-                } else {
-                     // Log elements skipped due to missing essential data (lat/lon or amenity tag)
-                     // console.log(`Skipping element ${place.id} - Missing Lat/Lon or Amenity Tag.`);
-                     skippedCount++;
-                }
-            });
-
-            console.log(`Processed ${places.length} elements. Added ${markersAdded} markers. Skipped ${skippedCount} elements.`);
-             if (places.length > 0 && markersAdded === 0) {
-                 console.warn("Data received from Overpass, but no valid markers could be added. Check data structure, coordinate extraction, or filtering logic.");
-                 // alert("Found locations, but couldn't display them on the map.");
-             } else if (markersAdded === 0) {
-                  console.log("No locations matching the criteria were found in the specified area.");
-                  // alert("No restaurants/cafes found in the map area.");
-             }
         })
         .catch(error => {
-            console.error("Failed to fetch or process Overpass data:", error);
-            alert(`Could not load restaurant data. Please check your connection or try again later. Error: ${error.message}`);
+          console.error("Failed to fetch or process Overpass data:", error);
+          alert(`Could not load restaurant data. Please check your connection or try again later. Error: ${error.message}`);
+          throw error; // Re-throw to propagate the error
         });
     }
 
+    // --- Function to apply filters and update map markers ---
+    function applyMapFilters() {
+      if (!mapInstance || !allPlacesData || allPlacesData.length === 0) {
+        console.warn("Map not initialized or no data loaded. Cannot apply filters.");
+        return;
+      }
+
+      // Clear existing markers
+      if (mapInstance.markersLayer) { // Check if the layer group exists
+        mapInstance.removeLayer(mapInstance.markersLayer);
+      }
+      mapInstance.markersLayer = L.layerGroup().addTo(mapInstance); // Create a new layer group
+
+
+      const typeFilter = document.getElementById('map-type-filter').value;
+      const priceFilter = document.getElementById('map-price-filter').value;
+      const distanceSlider = document.getElementById('map-distance-slider');
+      const distanceFilterKm = parseFloat(distanceSlider.value);
+      const isDistanceFilterEnabled = !distanceSlider.disabled; // Check if slider is enabled
+
+
+      let filteredPlaces = allPlacesData.filter(place => {
+        const tags = place.tags || {};
+        const amenityType = tags.amenity;
+        const name = tags.name; // Get name here
+
+
+        let lat, lon;
+        if (place.type === 'node' && place.lat && place.lon) {
+          lat = place.lat;
+          lon = place.lon;
+        } else if (place.center && place.center.lat && place.center.lon) {
+          lat = place.center.lat;
+          lon = place.center.lon;
+        } else {
+          // If coordinates cannot be determined, this place cannot be shown or filtered
+          return false;
+        }
+
+
+        // Filter by Type
+        if (typeFilter !== 'all' && amenityType !== typeFilter) {
+          return false;
+        }
+
+        // Filter by Price (using estimated cost)
+        const estimatedCost = getEstimatedCost(name, amenityType);
+        if (priceFilter !== 'all' && estimatedCost !== priceFilter) {
+          return false;
+        }
+
+        // Filter by Distance - Only apply if slider is enabled and not at max
+        if (isDistanceFilterEnabled && userLocation && distanceFilterKm < parseFloat(distanceSlider.max)) { // *** Check if enabled and distanceFilterKm is less than max ***
+          const distance = calculateDistance(userLocation.lat, userLocation.lng, lat, lon);
+          if (distance > distanceFilterKm) {
+            return false;
+          }
+        }
+
+        // Basic check for valid coordinates and name (redundant with query filter but safe)
+        if (typeof name !== 'string' || name.trim() === '' || name.toLowerCase() === 'undefined') {
+          return false;
+        }
+
+
+        return true; // Keep the place if all filters pass
+      });
+
+
+      let markersAdded = 0;
+      filteredPlaces.forEach(place => {
+        let lat, lon; // Redeclare for this scope? No, use the ones determined in filter
+
+        // Use the lat and lon determined during filtering
+        if (place.type === 'node' && place.lat && place.lon) {
+          lat = place.lat;
+          lon = place.lon;
+        } else if (place.center && place.center.lat && place.center.lon) {
+          lat = place.center.lat;
+          lon = place.center.lon;
+        } else {
+          return; // Should not happen for filtered places, but defensive
+        }
+
+
+        const tags = place.tags || {};
+        const amenityType = tags.amenity;
+        const name = tags.name;
+
+        const placeIdentifier = place.id;
+        let displayType;
+        switch (amenityType) {
+          case "fast_food":
+            displayType = "🍔 Fast Food";
+            break;
+          case "food_court":
+            displayType = "🍽️ Food Court";
+            break;
+          case "cafe":
+            displayType = "☕ Cafe";
+            break;
+          case "restaurant":
+          default:
+            displayType = "🍴 Restaurant";
+            break;
+        }
+        let cost = getEstimatedCost(name, amenityType);
+
+
+        const safeName = name; // Validated in filter
+        const safeDisplayType = displayType !== undefined && displayType !== null ? displayType : 'Unknown Type';
+        const safeCost = cost !== undefined && cost !== null ? cost : 'N/A'; // *** Corrected this line ***
+
+        const popupContent = `
+                 <b>${safeName}</b> <br>
+                 ${safeDisplayType} - <span style="color: green; font-weight: bold;">${safeCost}</span>
+                 <div class="rating-container">
+                    <div class="star-rating" data-place-id="${placeIdentifier}">
+                         <span class="star" data-value="1">★</span><span class="star" data-value="2">★</span><span class="star" data-value="3">★</span><span class="star" data-value="4">★</span><span class="star" data-value="5">★</span>
+                     </div>
+                    <div class="rating-text">Rate this place</div>
+                 </div>
+             `;
+        try {
+          const marker = L.marker([lat, lon]).bindPopup(popupContent);
+          mapInstance.markersLayer.addLayer(marker); // Add to the new layer group
+          markersAdded++;
+        } catch (markerError) {
+          console.error(`Error creating marker for ${safeName} (${placeIdentifier}):`, markerError);
+        }
+
+      });
+
+      console.log(`Applied filters. Displaying ${markersAdded} markers.`);
+      if (markersAdded === 0) {
+        console.log("No places match the selected filters.");
+        // Optionally display a message on the map if no markers are shown
+      }
+
+
+    }
+
+    // --- Function to reset map filters ---
+    function resetMapFilters() {
+      document.getElementById('map-type-filter').value = 'all';
+      document.getElementById('map-price-filter').value = 'all';
+      const distanceSlider = document.getElementById('map-distance-slider');
+      const distanceValueDisplay = document.getElementById('map-distance-value');
+
+
+      // Reset distance slider only if it's currently enabled (meaning location was successfully found)
+      if (!distanceSlider.disabled) {
+        distanceSlider.value = distanceSlider.max; // Reset to max distance
+        distanceValueDisplay.textContent = `${distanceSlider.value} km`; // Update display
+      } else {
+        // If slider is disabled, just reset the text
+        distanceValueDisplay.textContent = `Location needed for distance`; // Or a specific error message
+      }
+
+
+      applyMapFilters(); // Re-apply filters (which will now show all places or filter based on state)
+      console.log("Map filters reset.");
+    }
+
+
+    // --- Load User's Rated Places ---
+    function loadRatedPlaces() {
+      const user = auth.currentUser;
+      const ratedPlacesList = document.getElementById('rated-places-list');
+      // Clear previous list is done in showRatedPlaces now with loading indicator
+      // ratedPlacesList.innerHTML = '';
+
+      if (!user) {
+        ratedPlacesList.innerHTML = '<li>Please log in to see your rated places.</li>';
+        console.warn("User not logged in. Cannot load rated places.");
+        // Hide filters if not logged in
+        document.getElementById('rated-places-controls').style.display = 'none';
+        return;
+      }
+
+      console.log("Loading rated places for user:", user.uid);
+      // Show filters if logged in (will be shown after data loads in showRatedPlaces)
+      // document.getElementById('rated-places-controls').style.display = 'block';
+
+
+      db.collection("ratings")
+        .where("userId", "==", user.uid)
+        .get()
+        .then((querySnapshot) => {
+          const latestRatings = {}; // Use an object to store the latest rating for each placeId
+
+          querySnapshot.forEach((doc) => {
+            const ratingData = doc.data();
+            const placeId = ratingData.placeId;
+            const ratingTimestamp = ratingData.timestamp ? ratingData.timestamp.toDate() : new Date(0); // Handle potential missing timestamp, use a very old date
+
+            // If we haven't seen this placeId before, or if the current rating is newer
+            if (!latestRatings[placeId] || ratingTimestamp >(latestRatings[placeId].timestamp ? latestRatings[placeId].timestamp.toDate() : new Date(0))) {
+              latestRatings[placeId] = ratingData; // Store the entire rating document data
+            }
+          });
+
+          // Convert the latest ratings object into an array and enrich with place details
+          currentUserRatings = Object.values(latestRatings).map(ratingData => {
+            // Find the place details from the allPlacesData
+            const place = allPlacesData.find(p => p.id.toString() === ratingData.placeId);
+            let placeAddress = 'Location details not available'; // Default address message
+            let placeName = `Place ID: ${ratingData.placeId} (Details not loaded)`; // Default name message
+
+
+            if (place) {
+              const tags = place.tags || {};
+              placeName = tags.name || `Unnamed Place (${ratingData.placeId})`; // Use actual name if available
+
+              // Attempt to construct a simple address from available tags
+              const street = tags['addr:street'];
+              const housenumber = tags['addr:housenumber'];
+              const city = tags['addr:city'] || tags['addr:town'] || tags['addr:village'];
+              const neighbourhood = tags['addr:neighbourhood'];
+
+
+              if (street && housenumber) {
+                placeAddress = `${housenumber} ${street}`;
+              } else if (street) {
+                placeAddress = street;
+              } else if (neighbourhood && city) {
+                placeAddress = `${neighbourhood}, ${city}`;
+              } else if (city) {
+                placeAddress = city;
+              } else if (neighbourhood) {
+                placeAddress = neighbourhood;
+              }
+              // Add other relevant address parts if needed
+            } else {
+              console.warn(`Place details not found in allPlacesData for rated placeId: ${ratingData.placeId}`);
+              // placeName is already set to default "Place ID..."
+              // placeAddress is already set to default "Location details..."
+            }
+
+
+            return {
+              placeId: ratingData.placeId,
+              rating: ratingData.rating,
+              placeName: placeName, // Use the determined name
+              placeType: place ? place.tags.amenity : 'unknown', // Store amenity type if place found
+              placeCost: getEstimatedCost(placeName, place ? place.tags.amenity : 'unknown'), // Get estimated cost using the determined name and amenity
+              placeAddress: placeAddress // Include the constructed address
+            };
+          });
+
+
+          console.log("Fetched and processed unique rated places with latest ratings:", currentUserRatings);
+
+          // Display the initial list (no filters applied yet)
+          displayFilteredPlaces(currentUserRatings);
+
+        })
+        .catch((error) => {
+          console.error("Error fetching rated places:", error);
+          ratedPlacesList.innerHTML = '<li>Error loading rated places.</li>';
+          alert("Failed to load your rated places. Please try again.");
+        });
+    }
+
+    // --- Function to display filtered rated places ---
+    function displayFilteredPlaces(filteredRatings) {
+      const ratedPlacesList = document.getElementById('rated-places-list');
+      ratedPlacesList.innerHTML = ''; // Clear previous list
+
+      if (filteredRatings.length === 0) {
+        ratedPlacesList.innerHTML = '<li>No places match the selected filters.</li>';
+        return;
+      }
+
+      filteredRatings.forEach(rating => {
+        const listItem = document.createElement('li');
+
+        // Generate star HTML based on the current rating
+        let starHtml = '';
+        for (let i = 1; i <= 5; i++) {
+          starHtml += `<span class="star ${i <= rating.rating ? 'selected' : ''}" data-value="${i}">★</span>`;
+        }
+
+
+        listItem.innerHTML = `
+                 <div class="place-info">
+                    <strong>${rating.placeName}</strong> <br>
+                    <small>${rating.placeAddress}</small><br> <small>${rating.placeCost !== 'N/A' ? 'Price: ' + rating.placeCost : 'Price: N/A'}</small>
+                </div>
+                 <div class="rating-controls">
+                     <div class="star-rating" data-place-id="${rating.placeId}">
+                         ${starHtml}
+                     </div>
+                     </div>
+            `;
+        // Optional: Add a link to view on the map
+        const place = allPlacesData.find(p => p.id.toString() === rating.placeId); // Find the original place data
+        // Only add the "View on Map" link if place details were found in the initial map data
+        if (place) {
+          const viewOnMapLink = document.createElement('a');
+          viewOnMapLink.href = '#'; // Prevent default link behavior
+          viewOnMapLink.textContent = 'View on Map';
+          viewOnMapLink.onclick = (e) => {
+            e.preventDefault(); // Stop the default link click
+            showMap(); // Switch back to map view
+            // Find the marker on the map and open its popup
+            if (mapInstance) {
+              // Iterate through layers to find the marker
+              mapInstance.eachLayer(layer => {
+                if (layer instanceof L.Marker) {
+                  // Access the popup content or a stored placeId if available
+                  // This assumes the placeId is somehow associated with the marker/popup
+                  if (layer.getPopup() && layer.getPopup().getContent().includes(`data-place-id="${rating.placeId}"`)) {
+                    mapInstance.setView(layer.getLatLng(), 15); // Center map on marker
+                    layer.openPopup(); // Open the marker's popup
+                  }
+                }
+              });
+            }
+          };
+          // Append the "View on Map" link inside the rating-controls div for better layout
+          listItem.querySelector('.rating-controls').appendChild(viewOnMapLink);
+        }
+
+
+        ratedPlacesList.appendChild(listItem);
+      });
+    }
+
+    // --- Function to apply filters ---
+    function applyFilters() {
+      const priceFilter = document.getElementById('price-filter').value;
+      const ratingFilter = document.getElementById('rating-filter').value;
+
+      let filtered = [...currentUserRatings]; // Start with all loaded ratings
+
+      // Apply price filter
+      if (priceFilter !== 'all') {
+        filtered = filtered.filter(rating => rating.placeCost === priceFilter);
+      }
+
+      // Apply rating filter
+      if (ratingFilter !== 'all') {
+        const minRating = parseInt(ratingFilter);
+        filtered = filtered.filter(rating => rating.rating >= minRating);
+      }
+
+      // Display the filtered results
+      displayFilteredPlaces(filtered);
+    }
+
+
     // --- Background Image Carousel ---
     function carousel() {
-        const images = document.querySelectorAll('#background-carousel img');
-        if (images.length === 0) {
-            console.warn("No images found for background carousel.");
-            return; // Exit if no images
-        }
-        let currentIndex = 0;
-
-        // Ensure the first image is active initially
-        images.forEach((img, index) => {
-            img.classList.toggle('active', index === 0);
-        });
-
-
-        setInterval(() => {
-            images[currentIndex].classList.remove('active'); // Fade out current
-            currentIndex = (currentIndex + 1) % images.length; // Move to next index, loop around
-            images[currentIndex].classList.add('active'); // Fade in next
-        }, 4000); // Change image every 4 seconds
+      const images = document.querySelectorAll('#background-carousel img');
+      if (images.length === 0) {
+        console.warn("No images found for background carousel.");
+        return; // Exit if no images
+      }
+      let currentIndex = 0;
+      // Ensure the first image is active initially
+      images.forEach((img, index) => {
+        img.classList.toggle('active', index === 0);
+      });
+      setInterval(() => {
+        images[currentIndex].classList.remove('active'); // Fade out current
+        currentIndex = (currentIndex + 1) % images.length; // Move to next index, loop around
+        images[currentIndex].classList.add('active'); // Fade in next
+      }, 4000);
+      // Change image every 4 seconds
     }
 
     // --- Initial Setup on Page Load ---
     document.addEventListener('DOMContentLoaded', (event) => {
-         carousel(); // Start the background image carousel
-         // Don't call loadMap() here; it should only be called after successful login.
-         // setupRatingStars(); // Set up rating listeners immediately (or wait until login?)
-         // Setting up listeners immediately is fine as they use event delegation.
-    });
+      carousel(); // Start the background image carousel
+      setupRatingStars(); // Set up rating listeners for dynamically added stars
 
+
+      // Add event listeners for the new buttons
+      document.getElementById('show-rated-places-button').addEventListener('click', showRatedPlaces);
+      document.getElementById('back-to-map-button').addEventListener('click', showMap);
+
+      // Add event listeners for map filter buttons
+      document.getElementById('apply-map-filters-button').addEventListener('click', applyMapFilters);
+      document.getElementById('reset-map-filters-button').addEventListener('click', resetMapFilters);
+
+
+      // Add event listeners for rated places filter changes
+      document.getElementById('price-filter').addEventListener('change', applyFilters);
+      document.getElementById('rating-filter').addEventListener('change', applyFilters);
+
+      // Add event listeners for the user menu and logout
+      const userMenuContainer = document.getElementById('user-menu-container');
+      const logoutOption = document.getElementById('logout-option');
+
+      userMenuContainer.addEventListener('click', function(e) {
+        // Prevent clicks inside the logout option from closing the menu
+        if (e.target.id !== 'logout-option') {
+          // Toggle display of the logout option
+          const isVisible = logoutOption.style.display === 'block';
+          logoutOption.style.display = isVisible ? 'none' : 'block';
+        }
+      });
+
+      logoutOption.addEventListener('click', function() {
+        logout(); // Call the logout function
+      });
+
+      // Hide logout option if user clicks anywhere else on the page
+      document.addEventListener('click', function(e) {
+        // Check if the click was outside the user menu container AND the My Ratings button
+        if (!userMenuContainer.contains(e.target) && e.target.id !== 'show-rated-places-button') {
+          logoutOption.style.display = 'none';
+        }
+      });
+
+
+      // Initially hide elements until login
+      document.getElementById('show-rated-places-button').style.display = 'none';
+      document.getElementById('rated-places-controls').style.display = 'none';
+      document.getElementById('back-to-map-button').style.display = 'none';
+      document.getElementById('map-filters-container').style.display = 'none'; // Initially hide map filters
+      document.getElementById('user-menu-container').style.display = 'none'; // Initially hide user menu
+
+    });
   </script>
 </body>
 
