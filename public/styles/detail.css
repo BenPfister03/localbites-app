@@ -1,0 +1,62 @@
+.restaurant-detail {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 500px;
+    background-color: #fff;
+    border-radius: 30px 30px 0 0;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+    padding: 24px 32px;
+    font-family: 'Bangers', cursive;
+    z-index: 1000;
+    display: none;
+  }
+
+  .restaurant-detail.show {
+    display: block;
+  }
+  
+  .restaurant-detail h3 {
+    font-size: 2.4em;
+    color: #ff6600;
+    margin: 0 0 10px;
+    text-shadow: 1px 1px #00000010;
+  }
+  
+  .rating-stars {
+    font-size: 1.6em;
+    color: #ffc107;
+    margin-bottom: 10px;
+  }
+  
+  .restaurant-detail .price {
+    font-size: 1.2em;
+    margin-bottom: 16px;        /*display price*/
+    color: #444;
+  }
+  
+  .user-rating {
+    display: flex;
+    align-items: center;  /*user input*/
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .user-rating span.label {
+    font-size: 1.2em;
+    color: #222;
+  }
+  
+  .user-rating .star {
+    font-size: 1.6em;
+    color: #ccc;        /* clickable stars for rating*/
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+  
+  .user-rating .star:hover,
+  .user-rating .star:hover ~ .star {
+    color: #ffc107;
+  }
