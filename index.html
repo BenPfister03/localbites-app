@@ -44,6 +44,7 @@
       width: 100%;
       display: none;
       transition: opacity 0.5s ease-in-out;
+      z-index: 0;
     }
 
     h1 {
@@ -68,7 +69,7 @@
       align-items: center;
       justify-content: center;
       height: 100vh;
-      backdrop-filter: brightness(0.9);
+      backdrop-filter: brightness(0.7) blur(3px);
       border-radius: 20px;
       max-width: 420px;
       margin: auto;
@@ -76,12 +77,15 @@
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
       padding: 40px 30px;
       transition: transform 0.5s ease, opacity 0.5s ease;
+      position: relative;
+      z-index: 5;
     }
 
     #login-container h2 {
       margin-bottom: 10px;
       color: #333;
       font-size: 28px;
+      text-align: center;
     }
 
     #login-container p {
@@ -99,6 +103,7 @@
       border-radius: 8px;
       font-size: 16px;
       transition: border-color 0.3s;
+      box-sizing: border-box;
     }
 
     #login-container input:focus {
@@ -117,28 +122,12 @@
       font-size: 16px;
       cursor: pointer;
       transition: background-color 0.3s ease, transform 0.2s;
+      box-sizing: border-box;
     }
 
     #login-container button:hover {
       background-color: #f4511e;
       transform: scale(1.02);
-    }
-
-    .rating-stars button {
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 18px;
-      transition: transform 0.2s;
-    }
-
-    .rating-stars button:hover {
-      transform: scale(1.2);
-    }
-
-    .user-location-marker {
-      background: transparent;
-      border: none;
     }
 
     .user-location-marker {
@@ -147,6 +136,7 @@
       font-size: 30px;
       line-height: 1;
       text-align: center;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
     }
 
     .rating-container {
@@ -163,38 +153,25 @@
     .star-rating .star {
       color: #ddd;
       display: inline-block;
-      transition: all 0.3s;
-      text-shadow:
-        -1px -1px 0 #000,
-        1px -1px 0 #000,
-        -1px 1px 0 #000,
-        1px 1px 0 #000;
-      
-      -webkit-text-stroke: 1px #000;
-      
-      position: relative;
+      transition: all 0.2s;
+      -webkit-text-stroke: 1px #555;
+        paint-order: stroke fill;
+        text-shadow: none;
     }
 
     .star-rating .star.hover {
       color: #ffd700;
-      text-shadow:
-        -1px -1px 0 #000,
-        1px -1px 0 #000,
-        -1px 1px 0 #000,
-        1px 1px 0 #000;
+      transform: scale(1.1);
+        -webkit-text-stroke: 1px #333;
     }
 
     .star-rating .star.selected {
       color: #ff9800;
-      text-shadow:
-        -1px -1px 0 #000,
-        1px -1px 0 #000,
-        -1px 1px 0 #000,
-        1px 1px 0 #000;
+        -webkit-text-stroke: 1px #555;
     }
 
     .star-rating .star:active {
-      filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.7));
+        transform: scale(0.95);
     }
 
     .rating-text {
@@ -202,13 +179,28 @@
       font-size: 14px;
       color: #666;
     }
+
+    /* Style for Leaflet popups */
+    .leaflet-popup-content-wrapper {
+        border-radius: 8px;
+    }
+    .leaflet-popup-content {
+        margin: 15px;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+    .leaflet-popup-content b {
+        color: #333;
+        font-size: 16px;
+    }
+
   </style>
 </head>
 
 <body>
 
   <div id="background-carousel">
-    <img src="https://cdn.drop.media/localbites-app/4bc84626-6348-4167-a21d-0fa195782908.jpeg" />
+    <img src="https://cdn.drop.media/localbites-app/4bc84626-6348-4167-a21d-0fa195782908.jpeg" class="active"/>
     <img src="https://cdn.drop.media/localbites-app/4242a0be-ff4f-40e6-b309-2d01be3e904c.jpeg" />
     <img src="https://cdn.drop.media/localbites-app/c9f7effa-d919-4293-bf8c-1d8ccdcda269.jpeg" />
     <img src="https://cdn.drop.media/localbites-app/4e3e4c7f-3028-4e5c-a185-10e26f0706e2.jpeg" />
@@ -220,9 +212,8 @@
 
   <h1 id="header">🍴 LocalBites - Neighborhood Restaurant Explorer</h1>
   <div id="login-container">
-    <h2>LocalBites - Neighborhood Restaurant Explorer</h2>
-    <p>A web app that helps users discover nearby restaurants using geolocation, with filters for dietary needs and
-      price range. Users can save favorites and leave quick ratings.</p>
+    <h2>LocalBites</h2>
+    <p>Discover nearby restaurants, filter by needs, save favorites, and leave ratings.</p>
     <input type="text" id="username" placeholder="Username" />
     <input type="password" id="password" placeholder="Password" />
     <button onclick="login()">Login</button>
@@ -233,242 +224,356 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+
   <script>
+    // --- Firebase Configuration ---
     const firebaseConfig = {
-      apiKey: "AIzaSyCg-LBaiDXSsTCg2_k-aZyy4Oqay2Z2Ozg",
+      apiKey: "AIzaSyCg-LBaiDXSsTCg2_k-aZyy4Oqay2Z2Ozg", // Warning: Sensitive key
       authDomain: "localbites-2025-c31a4.firebaseapp.com",
       projectId: "localbites-2025-c31a4",
       storageBucket: "localbites-2025-c31a4.firebasestorage.app",
       messagingSenderId: "927978421503",
       appId: "1:927978421503:web:310eaa5c33e972c51260ca"
     };
-
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
+    // --- Global Variables ---
+    let mapInstance = null;
+    let mapInitialized = false;
+
+    // --- Login Function ---
     function login() {
       const username = document.getElementById("username").value;
       const password = document.getElementById("password").value;
+      if (!username || !password) {
+          alert("Please enter both username and password.");
+          return;
+      }
       const email = `${username}@example.com`;
 
       auth.signInWithEmailAndPassword(email, password)
-        .then(() => {
-          const loginEl = document.getElementById("login-container");
-          loginEl.style.opacity = 0;
-          setTimeout(() => loginEl.style.display = "none", 500);
-          const mapEl = document.getElementById("map");
-          mapEl.style.display = "block";
-          mapEl.style.opacity = 1;
+        .then((userCredential) => {
+            console.log("Login successful for:", userCredential.user.email);
+            const loginEl = document.getElementById("login-container");
+            loginEl.style.opacity = 0;
+            setTimeout(() => loginEl.style.display = "none", 500);
 
-          const header = document.getElementById("header");
-          header.style.display = "block";
-          header.style.opacity = 1;
+            const mapEl = document.getElementById("map");
+            mapEl.style.display = "block";
+            setTimeout(() => mapEl.style.opacity = 1, 50);
 
-          loadMap();
-          setupRatingStars();
+            const header = document.getElementById("header");
+            header.style.display = "block";
+            setTimeout(() => header.style.opacity = 1, 50);
+
+            loadMap();
+            setupRatingStars();
         })
-        .catch(error => alert("Login failed: " + error.message));
+        .catch(error => {
+            console.error("Login failed:", error);
+            let message = "Login failed. Please check your credentials.";
+            if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+              message = "Invalid username or password.";
+            } else if (error.code === 'auth/invalid-email') {
+              message = "Invalid username format.";
+            } else {
+              message = "An error occurred during login. Please try again.";
+            }
+            alert(message);
+        });
     }
 
+    // --- Rating Stars Interaction Setup ---
     function setupRatingStars() {
-      document.addEventListener('click', function (e) {
-        if (e.target.classList.contains('star')) {
-          const ratingContainer = e.target.closest('.star-rating');
-          const placeId = ratingContainer.getAttribute('data-place-id');
-          const rating = parseInt(e.target.getAttribute('data-value'));
+      document.body.addEventListener('click', function (e) {
+          if (e.target.classList.contains('star')) {
+              const ratingContainer = e.target.closest('.star-rating');
+              if (!ratingContainer) return;
 
-         
-          const stars = ratingContainer.querySelectorAll('.star');
-          stars.forEach((star, index) => {
-            star.classList.toggle('selected', index < rating);
-          });
+              const placeId = ratingContainer.getAttribute('data-place-id');
+              const rating = parseInt(e.target.getAttribute('data-value'));
 
-          
-          submitRating(placeId, rating);
-        }
+              if (!placeId || isNaN(rating)) {
+                  console.error("Missing placeId or invalid rating value from star element.");
+                  return;
+              }
+
+              const stars = ratingContainer.querySelectorAll('.star');
+              stars.forEach((star, index) => {
+                  star.classList.toggle('selected', index < rating);
+                  star.classList.remove('hover');
+              });
+
+              const ratingText = ratingContainer.nextElementSibling;
+              if(ratingText && ratingText.classList.contains('rating-text')) {
+                  ratingText.textContent = `Your rating: ${rating} ★`;
+              }
+
+              submitRating(placeId, rating);
+          }
       });
 
-      
-      document.addEventListener('mouseover', function (e) {
-        if (e.target.classList.contains('star')) {
-          const ratingContainer = e.target.closest('.star-rating');
-          const hoverValue = parseInt(e.target.getAttribute('data-value'));
+      document.body.addEventListener('mouseover', function (e) {
+          if (e.target.classList.contains('star')) {
+              const ratingContainer = e.target.closest('.star-rating');
+              if (!ratingContainer) return;
 
-          const stars = ratingContainer.querySelectorAll('.star');
-          stars.forEach((star, index) => {
-            star.classList.toggle('hover', index < hoverValue);
-          });
-        }
+              const hoverValue = parseInt(e.target.getAttribute('data-value'));
+              if (isNaN(hoverValue)) return;
+
+              const stars = ratingContainer.querySelectorAll('.star');
+              stars.forEach((star, index) => {
+                  star.classList.toggle('hover', index < hoverValue);
+              });
+          }
       });
 
-     
-      document.addEventListener('mouseout', function (e) {
-        if (e.target.classList.contains('star')) {
+      document.body.addEventListener('mouseout', function (e) {
           const ratingContainer = e.target.closest('.star-rating');
-          const stars = ratingContainer.querySelectorAll('.star');
-          stars.forEach(star => star.classList.remove('hover'));
-        }
+          if (ratingContainer) {
+              if (!ratingContainer.contains(e.relatedTarget)) {
+                  const stars = ratingContainer.querySelectorAll('.star');
+                  stars.forEach(star => star.classList.remove('hover'));
+              }
+          }
       });
     }
 
+
+    // --- Submit Rating to Firestore ---
     function submitRating(placeId, rating) {
       const user = auth.currentUser;
       if (!user) {
-        alert("Please login to rate places");
-        return;
+          alert("Please login to rate places");
+          return;
       }
-
-      
       if (rating < 1 || rating > 5) {
-        console.error("Invalid rating value");
-        return;
+          console.error("Invalid rating value:", rating);
+          return;
       }
 
- 
-      db.collection("ratings")
-        .where("userId", "==", user.uid)
-        .where("placeId", "==", placeId)
-        .get()
-        .then((querySnapshot) => {
-          if (querySnapshot.empty) {
-           
-            return db.collection("ratings").add({
-              userId: user.uid,
-              placeId,
-              rating,
-              timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            });
-          } else {
-            
-            return querySnapshot.docs[0].ref.update({
-              rating,
-              timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            });
-          }
-        })
-        .then(() => {
-          console.log("Rating saved successfully");
-        })
-        .catch(err => {
-          console.error("Rating error:", err);
-          alert("Failed to save rating");
-        });
-    }
+      const ratingDocRef = db.collection("ratings").doc(`${user.uid}_${placeId}`);
 
-    function getUserLocation(map) {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const userLat = position.coords.latitude;
-            const userLng = position.coords.longitude;
-
-
-            const userIcon = L.divIcon({
-              className: 'user-location-marker',
-              html: '📍',
-              iconSize: [40, 40]
-            });
-
-            L.marker([userLat, userLng], { icon: userIcon })
-              .addTo(map)
-              .bindPopup("You are here!")
-              .openPopup();
-
-
-            map.setView([userLat, userLng], 14);
-          },
-          (error) => {
-            console.error("Geolocation error:", error);
-            alert("Could not get your location. Using default view.");
-          }
-        );
-      } else {
-        alert("Geolocation is not supported by this browser.");
-      }
-    }
-
-    function loadMap() {
-      const map = L.map('map').setView([10.6918, -61.2225], 11);
-
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(map);
-
-      getUserLocation(map);
-
-      const overpassUrl = 'https://overpass-api.de/api/interpreter';
-      const query = `
-      [out:json][timeout:25];
-      area["name"="Trinidad and Tobago"]->.searchArea;
-      (
-        node["amenity"="restaurant"](area.searchArea);
-        way["amenity"="restaurant"](area.searchArea);
-        relation["amenity"="restaurant"](area.searchArea);
-        node["amenity"="fast_food"](area.searchArea);
-        way["amenity"="fast_food"](area.searchArea);
-        relation["amenity"="fast_food"](area.searchArea);
-        node["amenity"="food_court"](area.searchArea);
-        way["amenity"="food_court"](area.searchArea);
-        relation["amenity"="food_court"](area.searchArea);
-      );
-      out center;
-    `;
-
-      fetch(overpassUrl, {
-        method: 'POST',
-        body: query
+      ratingDocRef.set({
+          userId: user.uid,
+          placeId: placeId,
+          rating: rating,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true })
+      .then(() => {
+          console.log("Rating saved successfully for place:", placeId, "Rating:", rating);
       })
-        .then(response => response.json())
-        .then(data => {
-          const places = data.elements;
+      .catch(err => {
+          console.error("Rating error:", err);
+          alert("Failed to save rating: " + err.message);
+      });
+    }
 
-          places.forEach(place => {
-            const lat = place.lat || (place.center && place.center.lat);
-            const lon = place.lon || (place.center && place.center.lon);
+    // --- Get User Location ---
+    function getUserLocation(mapToUse) {
+        if (!mapToUse) {
+            console.error("Map instance not available for getUserLocation");
+            return;
+        }
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const userLat = position.coords.latitude;
+                    const userLng = position.coords.longitude;
 
-            if (lat && lon && place.tags?.name) {
-              const name = place.tags.name;
-              const type = place.tags.amenity === "fast_food" ? "🍔 Fast Food" :
-                place.tags.amenity === "food_court" ? "🍽️ Food Court" :
-                  "🍴 Restaurant";
-              L.marker([lat, lon])
-                .addTo(map)
-                .bindPopup(`
-                    ${name} <br>${type}
-                    <div class="rating-container">
-                   <div class="star-rating" data-place-id="${place.id || place.tags.name}">
-                   <span class="star" data-value="1">★</span>
-                   <span class="star" data-value="2">★</span>
-                   <span class="star" data-value="3">★</span>
-                   <span class="star" data-value="4">★</span>
-                   <span class="star" data-value="5">★</span>
-                   </div>
-                   <div class="rating-text">Rate this place</div>
-                   </div>
-              `);
+                    const userIcon = L.divIcon({
+                        className: 'user-location-marker',
+                        html: '📍',
+                        iconSize: [40, 40],
+                        iconAnchor: [20, 40],
+                        popupAnchor: [0, -40]
+                    });
+
+                    L.marker([userLat, userLng], { icon: userIcon })
+                        .addTo(mapToUse)
+                        .bindPopup("<b>You are here!</b>")
+                        .openPopup();
+
+                    mapToUse.setView([userLat, userLng], 14);
+                },
+                (error) => {
+                    console.error("Geolocation error:", error);
+                    const defaultLat = 10.6667;
+                    const defaultLng = -61.5167;
+                    if (error.code !== 1) {
+                        alert("Could not get your location. Showing default map area (Port of Spain).");
+                    } else {
+                        console.log("User denied geolocation. Showing default map area (Port of Spain).");
+                    }
+                    mapToUse.setView([defaultLat, defaultLng], 13);
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        } else {
+            alert("Geolocation is not supported by this browser. Showing default map area (Port of Spain).");
+            const defaultLat = 10.6667;
+            const defaultLng = -61.5167;
+            mapToUse.setView([defaultLat, defaultLng], 13);
+        }
+    }
+
+    // --- Load Map and Data ---
+    function loadMap() {
+        if (mapInitialized) {
+            console.warn("Map already initialized. Skipping re-initialization.");
+            return;
+        }
+
+        const defaultLat = 10.6667;
+        const defaultLng = -61.5167;
+        mapInstance = L.map('map').setView([defaultLat, defaultLng], 13);
+        mapInitialized = true;
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19
+        }).addTo(mapInstance);
+
+        getUserLocation(mapInstance);
+
+        // *** Updated estimatedPrices object ***
+        const estimatedPrices = {
+            "Buzo Osteria Italiana": "$$$", "Krave": "$$$", "Luce": "$$$",
+            "Seahorse Restaurant & Bar": "$$$", "Bottles And Bites": "$$$", "The Meena House": "$$$",
+            "Sails Restaurant & Pub": "$$", "North Sea Restaurant Co. Ltd.": "$$", "Luna Restaurant": "$$",
+            "The Deck": "$$", "Big G Gyros": "$$", "Kebbab & Shawarma Station": "$$", "Burger Joint": "$$",
+            "D Ultimate StrEAT Vibe": "$$", "Pizza Hut": "$$", "Mario's Pizza": "$$", "Rituals Coffee House": "$$",
+            "Chaud Cafe & Wine Bar": "$$$",
+            "KO COMBOS": "$", "Royal Castle": "$", // Kept others at $
+            // Updated to $$ as requested
+            "Subway": "$$",
+            "Dairy Queen": "$$",
+            "Mr Chows Smoke House": "$$",
+            "Burger King": "$$",
+            "McDonald's": "$$"
+        };
+        // *** End of updated estimatedPrices object ***
+
+        const overpassUrl = 'https://overpass-api.de/api/interpreter';
+        const bbox = "10.0,-61.95,11.3,-60.9";
+        const query = `
+        [out:json][timeout:45];
+        (
+        node["amenity"~"^(restaurant|fast_food|food_court|cafe)$"](${bbox});
+        way["amenity"~"^(restaurant|fast_food|food_court|cafe)$"](${bbox});
+        relation["amenity"~"^(restaurant|fast_food|food_court|cafe)$"](${bbox});
+        );
+        out center;
+        >;
+        out skel qt;
+        `;
+
+        console.log("Fetching data from Overpass...");
+        fetch(overpassUrl, {
+            method: 'POST',
+            body: `data=${encodeURIComponent(query)}`
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-          });
+            return response.json();
+        })
+        .then(data => {
+            console.log("Overpass Data Received:", data);
+            const places = data.elements;
+            const markers = L.layerGroup().addTo(mapInstance);
+            let markersAdded = 0;
+
+            places.forEach(place => {
+                let lat, lon;
+                const amenityType = place.tags?.amenity;
+
+                if (place.type === 'node') {
+                    lat = place.lat;
+                    lon = place.lon;
+                } else if (place.center) {
+                    lat = place.center.lat;
+                    lon = place.center.lon;
+                }
+
+                if (lat && lon && amenityType) {
+                    const name = place.tags?.name || `Unnamed ${amenityType.replace('_', ' ')}`;
+                    const type = amenityType === "fast_food" ? "🍔 Fast Food" :
+                                 amenityType === "food_court" ? "🍽️ Food Court" :
+                                 amenityType === "cafe" ? "☕ Cafe" :
+                                 "🍴 Restaurant";
+
+                    // --- Calculate Cost ---
+                    let cost;
+                    if (estimatedPrices.hasOwnProperty(name)) {
+                        const original = estimatedPrices[name];
+                        cost = (original === "$$$") ? "$$$$" : original; // Apply $$$ -> $$$$ rule if needed
+                    }
+                    // Fallback based on amenity type if not in estimatedPrices
+                    else if (amenityType === "restaurant") {
+                        cost = "$$$";
+                    } else if (amenityType === "fast_food") {
+                        cost = "$";
+                    } else if (amenityType === "cafe") {
+                        cost = "$$";
+                    } else {
+                        cost = "$$"; // Default fallback
+                    }
+                    // --- End Calculate Cost ---
+
+                    const placeIdentifier = place.id;
+
+                    const popupContent = `
+                        <b>${name}</b> <br>
+                        ${type} - <span style="color: green; font-weight: bold;">${cost}</span>
+                        <div class="rating-container">
+                            <div class="star-rating" data-place-id="${placeIdentifier}">
+                                <span class="star" data-value="1">★</span><span class="star" data-value="2">★</span><span class="star" data-value="3">★</span><span class="star" data-value="4">★</span><span class="star" data-value="5">★</span>
+                            </div>
+                            <div class="rating-text">Rate this place</div>
+                        </div>
+                    `;
+
+                    const marker = L.marker([lat, lon]).bindPopup(popupContent);
+                    markers.addLayer(marker);
+                    markersAdded++;
+                }
+            });
+
+            console.log(`Processed ${places.length} elements. Added ${markersAdded} markers to the map.`);
+             if (places.length > 0 && markersAdded === 0) {
+                   console.warn("No markers added. Check Overpass data or filtering logic.");
+             } else if (markersAdded < places.length) {
+                   console.log(`Note: ${places.length - markersAdded} elements were skipped.`);
+             }
         }).catch(error => {
-          console.error("Map loading error:", error);
+            console.error("Map loading/Overpass error:", error);
+            alert("Could not load restaurant data. " + error.message);
         });
     }
 
+    // --- Background Image Carousel ---
     function carousel() {
-      const images = document.querySelectorAll('#background-carousel img');
-      let currentIndex = 0;
+        const images = document.querySelectorAll('#background-carousel img');
+        if (images.length === 0) {
+            console.warn("No images found for background carousel.");
+            return;
+        }
+        let currentIndex = 0;
 
-
-      images[currentIndex].classList.add('active');
-
-      setInterval(() => {
-        images.forEach(img => img.classList.remove('active'));
-        currentIndex = (currentIndex + 1) % images.length;
-        images[currentIndex].classList.add('active');
-      }, 4000);
+        setInterval(() => {
+            images[currentIndex].classList.remove('active');
+            currentIndex = (currentIndex + 1) % images.length;
+            images[currentIndex].classList.add('active');
+        }, 4000);
     }
 
+    // --- Initial Setup ---
     carousel();
+
   </script>
 </body>
 
