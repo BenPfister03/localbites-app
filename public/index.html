@@ -47,7 +47,8 @@
       z-index: 0;
     }
 
-    h1 {
+    /* --- Modified h1 selector to include ID --- */
+    #header {
       position: absolute;
       z-index: 1000;
       top: 10px;
@@ -58,8 +59,8 @@
       padding: 10px 20px;
       border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-      display: none;
-      opacity: 0;
+      display: none; /* Starts hidden */
+      opacity: 0;    /* Starts transparent */
       transition: opacity 0.5s ease-in-out;
     }
 
@@ -127,19 +128,31 @@
       transition: background-color 0.3s ease, transform 0.2s;
       box-sizing: border-box;
     }
+     /* Simple style for secondary button */
+    #login-container button.secondary-btn {
+        background-color: #f0f0f0;
+        color: #555;
+        margin-top: 8px; /* Smaller gap */
+    }
 
     #login-container button:hover {
       background-color: #f4511e;
       transform: scale(1.02);
     }
+    #login-container button.secondary-btn:hover {
+        background-color: #e0e0e0;
+        color: #333;
+        transform: scale(1.02); /* Keep hover effect */
+    }
+
 
     .user-location-marker {
       background: transparent;
       border: none;
-      font-size: 30px;
+      font-size: 30px; /* Make emoji bigger */
       line-height: 1;
       text-align: center;
-      text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.5); /* Optional shadow */
     }
 
     .rating-container {
@@ -149,32 +162,32 @@
 
     .star-rating {
       display: inline-block;
-      font-size: 24px;
+      font-size: 24px; /* Adjust star size */
       cursor: pointer;
     }
 
     .star-rating .star {
-      color: #ddd;
+      color: #ddd; /* Default empty star color */
       display: inline-block;
       transition: all 0.2s;
-      -webkit-text-stroke: 1px #555;
-        paint-order: stroke fill;
-        text-shadow: none;
+      -webkit-text-stroke: 1px #555; /* Outline */
+       paint-order: stroke fill; /* Make outline appear behind fill */
+       text-shadow: none; /* Remove browser default shadows */
     }
 
     .star-rating .star.hover {
-      color: #ffd700;
+      color: #ffd700; /* Gold on hover */
       transform: scale(1.1);
-        -webkit-text-stroke: 1px #333;
+       -webkit-text-stroke: 1px #333; /* Darker outline on hover */
     }
 
     .star-rating .star.selected {
-      color: #ff9800;
-        -webkit-text-stroke: 1px #555;
+      color: #ff9800; /* Orange when selected */
+       -webkit-text-stroke: 1px #555; /* Keep outline when selected */
     }
 
     .star-rating .star:active {
-        transform: scale(0.95);
+       transform: scale(0.95); /* Slight shrink on click */
     }
 
     .rating-text {
@@ -185,16 +198,16 @@
 
     /* Style for Leaflet popups */
     .leaflet-popup-content-wrapper {
-        border-radius: 8px;
+       border-radius: 8px;
     }
     .leaflet-popup-content {
-        margin: 15px;
-        font-size: 14px;
-        line-height: 1.6;
+       margin: 15px;
+       font-size: 14px;
+       line-height: 1.6;
     }
     .leaflet-popup-content b {
-        color: #333;
-        font-size: 16px;
+       color: #333;
+       font-size: 16px;
     }
 
   </style>
@@ -213,10 +226,11 @@
     <img src="https://cdn.drop.media/localbites-app/571d65b4-8105-4a72-9214-17e576bf3e17.jpeg" />
   </div>
 
+  <h1 id="header">LocalBites - Neighborhood Restaurant Explorer</h1>
+
   <div id="login-container">
     <h2>LocalBites</h2>
     <p>Discover nearby restaurants, filter by needs, save favorites, and leave ratings.</p>
-
 
     <div id="login-form">
       <input type="text" id="username" placeholder="Username" />
@@ -224,7 +238,6 @@
       <button onclick="login()">Login</button>
       <button class="secondary-btn" onclick="showSignup()">Sign Up</button>
     </div>
-
 
     <div id="signup-form" style="display:none;">
       <input type="text" id="signup-username" placeholder="Username" />
@@ -234,6 +247,7 @@
       <button class="secondary-btn" onclick="showLogin()">Back to Login</button>
     </div>
   </div>
+
   <div id="map"></div>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -243,11 +257,13 @@
 
   <script>
     // --- Firebase Configuration ---
+    // IMPORTANT: Keep your API key secure in real applications!
+    // Consider using Firebase Hosting environment variables or backend functions.
     const firebaseConfig = {
-      apiKey: "AIzaSyCg-LBaiDXSsTCg2_k-aZyy4Oqay2Z2Ozg", // Warning: Sensitive key
+      apiKey: "AIzaSyCg-LBaiDXSsTCg2_k-aZyy4Oqay2Z2Ozg", // Warning: Sensitive key exposed client-side
       authDomain: "localbites-2025-c31a4.firebaseapp.com",
       projectId: "localbites-2025-c31a4",
-      storageBucket: "localbites-2025-c31a4.firebasestorage.app",
+      storageBucket: "localbites-2025-c31a4.appspot.com", // Corrected domain
       messagingSenderId: "927978421503",
       appId: "1:927978421503:web:310eaa5c33e972c51260ca"
     };
@@ -259,6 +275,7 @@
     let mapInstance = null;
     let mapInitialized = false;
 
+    // --- UI Toggling Functions ---
     function showSignup() {
       document.getElementById('login-form').style.display = 'none';
       document.getElementById('signup-form').style.display = 'block';
@@ -270,92 +287,121 @@
 
     // --- Login Function ---
     function login() {
-      const username = document.getElementById("username").value;
+      const username = document.getElementById("username").value.trim(); // Trim whitespace
       const password = document.getElementById("password").value;
       if (!username || !password) {
           alert("Please enter both username and password.");
           return;
       }
-      const email = `${username}@example.com`;
+      // Convert username to a dummy email for Firebase Auth
+      // NOTE: This assumes usernames don't contain characters invalid for email local parts.
+      // Consider more robust validation or storing the actual email during signup.
+      const email = `${username}@example.com`; // Using a placeholder domain
 
       auth.signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
-            console.log("Login successful for:", userCredential.user.email);
+            console.log("Login successful for:", userCredential.user.email); // Log the dummy email used
+
             const loginEl = document.getElementById("login-container");
             loginEl.style.opacity = 0;
-            setTimeout(() => loginEl.style.display = "none", 500);
+            setTimeout(() => loginEl.style.display = "none", 500); // Hide after fade
 
             const mapEl = document.getElementById("map");
-            mapEl.style.display = "block";
-            setTimeout(() => mapEl.style.opacity = 1, 50);
+            mapEl.style.display = "block"; // Make map take space
+            setTimeout(() => mapEl.style.opacity = 1, 50); // Fade in map
 
-            const header = document.getElementById("header");
-            header.style.display = "block";
-            setTimeout(() => header.style.opacity = 1, 50);
+            const header = document.getElementById("header"); // Now finds the h1
+            if (header) { // Defensive check (good practice)
+                header.style.display = "block"; // Make header take space
+                setTimeout(() => header.style.opacity = 1, 50); // Fade in header
+            } else {
+                console.error("Header element not found after login!");
+            }
 
-            loadMap();
-            setupRatingStars();
+
+            loadMap(); // Initialize map and fetch data
+            setupRatingStars(); // Set up listeners for rating stars
         })
         .catch(error => {
-            console.error("Login failed:", error);
+            console.error("Login failed:", error.code, error.message); // Log specific error code
             let message = "Login failed. Please check your credentials.";
-            if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-              message = "Invalid username or password.";
+            // Provide more specific feedback based on error codes
+            if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                 message = "Invalid username or password.";
             } else if (error.code === 'auth/invalid-email') {
-              message = "Invalid username format.";
-            } else {
-              message = "An error occurred during login. Please try again.";
+                 message = "Invalid username format used for login."; // More accurate message
+            } else if (error.code === 'auth/too-many-requests') {
+                message = "Too many login attempts. Please try again later.";
+            }
+             else {
+                 message = "An error occurred during login. Please try again."; // Generic fallback
             }
             alert(message);
         });
     }
 
+    // --- Signup Function ---
     function signup() {
       const username = document.getElementById('signup-username').value.trim();
       const password = document.getElementById('signup-password').value;
       const confirmPassword = document.getElementById('signup-confirm-password').value;
 
+      // Basic Input Validation
       if (!username || !password || !confirmPassword) {
-        alert("Please fill all fields!");
+        alert("Please fill all signup fields!");
         return;
       }
-
       if (username.length < 4) {
-        alert("Username must be at least 4 characters");
+        alert("Username must be at least 4 characters long.");
         return;
       }
-
-      if (password !== confirmPassword) {
-        alert("Passwords don't match!");
-        return;
-      }
-
       if (password.length < 6) {
-        alert("Password must be at least 6 characters");
+        alert("Password must be at least 6 characters long.");
         return;
       }
+      if (password !== confirmPassword) {
+        alert("Passwords do not match!");
+        return;
+      }
+      // Basic check for spaces or invalid characters in username if needed
+      if (/\s/.test(username) || !/^[a-zA-Z0-9_.-]+$/.test(username)) {
+          alert("Username can only contain letters, numbers, underscores (_), periods (.), and hyphens (-).");
+          return;
+      }
 
+
+      // Check if username already exists in Firestore before creating Auth user
       db.collection('users')
         .where('username', '==', username)
         .get()
         .then(snapshot => {
           if (!snapshot.empty) {
+            // Username already exists, throw a specific error to catch later
             throw new Error('username-exists');
           }
 
-
-          const dummyEmail = `${username}@${username}.dummy`; 
+          // If username is unique, proceed to create the Firebase Auth user
+          // Use a *different* dummy email strategy for creation if needed,
+          // or ideally, collect a real email address.
+          // Using a consistent dummy email based on username:
+          const dummyEmail = `${username}@example.com`;
           return auth.createUserWithEmailAndPassword(dummyEmail, password);
         })
         .then(userCredential => {
+          // User created successfully in Firebase Auth. Now save username in Firestore.
+          console.log("Firebase Auth user created:", userCredential.user.uid);
+          // Use the UID from Auth as the document ID in Firestore for easy linking
           return db.collection('users').doc(userCredential.user.uid).set({
             username: username,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            // Add any other user profile data you want to store here
           });
         })
         .then(() => {
+          console.log("User profile created in Firestore for:", username);
           alert("Account created successfully! You can now login.");
-          showLogin();
+          showLogin(); // Switch back to login form
+          // Clear signup form fields
           document.getElementById('signup-username').value = '';
           document.getElementById('signup-password').value = '';
           document.getElementById('signup-confirm-password').value = '';
@@ -364,9 +410,15 @@
           console.error("Signup failed:", error);
           let message = "Signup failed. Please try again.";
           if (error.message === 'username-exists') {
-            message = "Username already taken. Please choose another.";
+            message = "Username already taken. Please choose another one.";
+          } else if (error.code === 'auth/email-already-in-use') {
+            // This implies the *dummy* email is somehow already in use,
+            // which likely means the username is taken if using the username@example.com pattern.
+             message = "This username might already be registered.";
           } else if (error.code === 'auth/weak-password') {
-            message = "Password is too weak (min 6 chars).";
+            message = "Password is too weak. It must be at least 6 characters long.";
+          } else if (error.code === 'auth/invalid-email') {
+             message = "The username format is invalid for creating an account.";
           }
           alert(message);
         });
@@ -375,58 +427,69 @@
 
     // --- Rating Stars Interaction Setup ---
     function setupRatingStars() {
-      document.body.addEventListener('click', function (e) {
-          if (e.target.classList.contains('star')) {
-              const ratingContainer = e.target.closest('.star-rating');
-              if (!ratingContainer) return;
+        // Use event delegation on the body for dynamically added popups
+        document.body.addEventListener('click', function (e) {
+            // Check if the clicked element is a star inside a rating container
+            if (e.target.classList.contains('star') && e.target.closest('.star-rating')) {
+                const ratingContainer = e.target.closest('.star-rating');
+                const placeId = ratingContainer.getAttribute('data-place-id');
+                const rating = parseInt(e.target.getAttribute('data-value'));
 
-              const placeId = ratingContainer.getAttribute('data-place-id');
-              const rating = parseInt(e.target.getAttribute('data-value'));
+                if (!placeId || isNaN(rating)) {
+                    console.error("Missing placeId or invalid rating value from star element.");
+                    return;
+                }
 
-              if (!placeId || isNaN(rating)) {
-                  console.error("Missing placeId or invalid rating value from star element.");
-                  return;
-              }
+                // Update the visual state of stars in this specific container
+                const stars = ratingContainer.querySelectorAll('.star');
+                stars.forEach((star, index) => {
+                    star.classList.toggle('selected', index < rating);
+                    star.classList.remove('hover'); // Remove hover effect after clicking
+                });
 
-              const stars = ratingContainer.querySelectorAll('.star');
-              stars.forEach((star, index) => {
-                  star.classList.toggle('selected', index < rating);
-                  star.classList.remove('hover');
-              });
+                // Update the rating text (optional)
+                const ratingText = ratingContainer.nextElementSibling; // Assumes text div is immediately after
+                if(ratingText && ratingText.classList.contains('rating-text')) {
+                   ratingText.textContent = `Your rating: ${rating} ★`;
+                }
 
-              const ratingText = ratingContainer.nextElementSibling;
-              if(ratingText && ratingText.classList.contains('rating-text')) {
-                  ratingText.textContent = `Your rating: ${rating} ★`;
-              }
+                // Submit the rating to Firestore
+                submitRating(placeId, rating);
+            }
+        });
 
-              submitRating(placeId, rating);
-          }
-      });
+        // Handle hover effects using event delegation
+        document.body.addEventListener('mouseover', function (e) {
+             if (e.target.classList.contains('star') && e.target.closest('.star-rating')) {
+                const ratingContainer = e.target.closest('.star-rating');
+                const hoverValue = parseInt(e.target.getAttribute('data-value'));
+                if (isNaN(hoverValue)) return;
 
-      document.body.addEventListener('mouseover', function (e) {
-          if (e.target.classList.contains('star')) {
-              const ratingContainer = e.target.closest('.star-rating');
-              if (!ratingContainer) return;
+                const stars = ratingContainer.querySelectorAll('.star');
+                stars.forEach((star, index) => {
+                    // Add hover class up to the hovered star
+                    star.classList.toggle('hover', index < hoverValue);
+                });
+            }
+        });
 
-              const hoverValue = parseInt(e.target.getAttribute('data-value'));
-              if (isNaN(hoverValue)) return;
-
-              const stars = ratingContainer.querySelectorAll('.star');
-              stars.forEach((star, index) => {
-                  star.classList.toggle('hover', index < hoverValue);
-              });
-          }
-      });
-
-      document.body.addEventListener('mouseout', function (e) {
-          const ratingContainer = e.target.closest('.star-rating');
-          if (ratingContainer) {
-              if (!ratingContainer.contains(e.relatedTarget)) {
-                  const stars = ratingContainer.querySelectorAll('.star');
-                  stars.forEach(star => star.classList.remove('hover'));
-              }
-          }
-      });
+        // Clear hover effects when mouse leaves the rating container
+        document.body.addEventListener('mouseout', function (e) {
+            if (e.target.classList.contains('star') && e.target.closest('.star-rating')) {
+                 const ratingContainer = e.target.closest('.star-rating');
+                 // Check if the mouse is moving to another star within the same container or leaving entirely
+                 if (!ratingContainer.contains(e.relatedTarget)) {
+                      const stars = ratingContainer.querySelectorAll('.star');
+                      stars.forEach(star => star.classList.remove('hover'));
+                 }
+            } else if (e.target.classList.contains('star-rating')) {
+                 // Handle leaving the container itself
+                  if (!e.target.contains(e.relatedTarget)) {
+                      const stars = e.target.querySelectorAll('.star');
+                      stars.forEach(star => star.classList.remove('hover'));
+                  }
+            }
+        });
     }
 
 
@@ -434,28 +497,44 @@
     function submitRating(placeId, rating) {
       const user = auth.currentUser;
       if (!user) {
-          alert("Please login to rate places");
-          return;
+        console.warn("User not logged in. Cannot submit rating.");
+        alert("Please login to rate places.");
+        // Optionally, visually reset the stars if login is required
+        const ratingContainer = document.querySelector(`.star-rating[data-place-id="${placeId}"]`);
+        if (ratingContainer) {
+            const stars = ratingContainer.querySelectorAll('.star');
+            stars.forEach(star => star.classList.remove('selected', 'hover'));
+            const ratingText = ratingContainer.nextElementSibling;
+             if(ratingText && ratingText.classList.contains('rating-text')) {
+                 ratingText.textContent = `Rate this place`;
+             }
+        }
+        return;
       }
-      if (rating < 1 || rating > 5) {
-          console.error("Invalid rating value:", rating);
-          return;
+      if (rating < 1 || rating > 5 || isNaN(rating)) {
+        console.error("Invalid rating value:", rating);
+        return;
       }
 
+      // Use a composite key for the document ID: userId_placeId
+      // This makes it easy to query or fetch a specific user's rating for a place.
       const ratingDocRef = db.collection("ratings").doc(`${user.uid}_${placeId}`);
 
+      console.log(`Attempting to save rating: User ${user.uid}, Place ${placeId}, Rating ${rating}`);
+
       ratingDocRef.set({
-          userId: user.uid,
-          placeId: placeId,
-          rating: rating,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true })
+        userId: user.uid,
+        placeId: placeId.toString(), // Ensure placeId is stored as string if it comes from OSM id
+        rating: rating,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp() // Use server time
+      }, { merge: true }) // Use merge: true to update if exists, create if not
       .then(() => {
-          console.log("Rating saved successfully for place:", placeId, "Rating:", rating);
+        console.log("Rating saved successfully for place:", placeId, "Rating:", rating);
+        // Optionally provide user feedback e.g., inside the popup
       })
       .catch(err => {
-          console.error("Rating error:", err);
-          alert("Failed to save rating: " + err.message);
+        console.error("Error saving rating:", err);
+        alert("Failed to save your rating. Please try again. Error: " + err.message);
       });
     }
 
@@ -466,44 +545,70 @@
             return;
         }
         if (navigator.geolocation) {
+            console.log("Attempting to get user location...");
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     const userLat = position.coords.latitude;
                     const userLng = position.coords.longitude;
+                    console.log(`Location found: Lat: ${userLat}, Lng: ${userLng}`);
 
                     const userIcon = L.divIcon({
-                        className: 'user-location-marker',
-                        html: '📍',
-                        iconSize: [40, 40],
-                        iconAnchor: [20, 40],
-                        popupAnchor: [0, -40]
+                        className: 'user-location-marker', // Use CSS class for styling
+                        html: '📍', // You are here emoji
+                        iconSize: [40, 40],      // Size of the icon
+                        iconAnchor: [20, 40],    // Point of the icon which will correspond to marker's location (bottom center)
+                        popupAnchor: [0, -40]   // Point from which the popup should open relative to the iconAnchor
                     });
 
                     L.marker([userLat, userLng], { icon: userIcon })
                         .addTo(mapToUse)
                         .bindPopup("<b>You are here!</b>")
-                        .openPopup();
+                        .openPopup(); // Open popup immediately
 
-                    mapToUse.setView([userLat, userLng], 14);
+                    mapToUse.setView([userLat, userLng], 14); // Center map and zoom in
                 },
                 (error) => {
-                    console.error("Geolocation error:", error);
-                    const defaultLat = 10.6667;
-                    const defaultLng = -61.5167;
-                    if (error.code !== 1) {
-                        alert("Could not get your location. Showing default map area (Port of Spain).");
-                    } else {
-                        console.log("User denied geolocation. Showing default map area (Port of Spain).");
+                    console.error("Geolocation error:", error.code, error.message);
+                    const defaultLat = 10.6667; // Port of Spain Latitude
+                    const defaultLng = -61.5167; // Port of Spain Longitude
+                    let alertMsg = "Could not get your location.";
+
+                    switch (error.code) {
+                        case error.PERMISSION_DENIED:
+                            alertMsg += " Permission denied. Showing default map area (Port of Spain).";
+                            console.log("User denied Geolocation. Setting default view.");
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            alertMsg += " Location information is unavailable. Showing default map area (Port of Spain).";
+                             console.log("Location unavailable. Setting default view.");
+                            break;
+                        case error.TIMEOUT:
+                            alertMsg += " The request to get user location timed out. Showing default map area (Port of Spain).";
+                             console.log("Geolocation timeout. Setting default view.");
+                            break;
+                        default: // Including error.UNKNOWN_ERROR
+                            alertMsg += " An unknown error occurred. Showing default map area (Port of Spain).";
+                             console.log("Unknown geolocation error. Setting default view.");
+                            break;
                     }
-                    mapToUse.setView([defaultLat, defaultLng], 13);
+                    // Only alert if it wasn't a denial, as denials might be intentional.
+                    if (error.code !== error.PERMISSION_DENIED) {
+                         alert(alertMsg);
+                    }
+                    mapToUse.setView([defaultLat, defaultLng], 13); // Set default view
                 },
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                { // Geolocation options
+                    enableHighAccuracy: true, // Try for more accuracy
+                    timeout: 10000,          // Wait 10 seconds
+                    maximumAge: 0            // Don't use a cached position
+                }
             );
         } else {
+            console.log("Geolocation is not supported by this browser.");
             alert("Geolocation is not supported by this browser. Showing default map area (Port of Spain).");
-            const defaultLat = 10.6667;
-            const defaultLng = -61.5167;
-            mapToUse.setView([defaultLat, defaultLng], 13);
+            const defaultLat = 10.6667; // Port of Spain Latitude
+            const defaultLng = -61.5167; // Port of Spain Longitude
+            mapToUse.setView([defaultLat, defaultLng], 13); // Set default view
         }
     }
 
@@ -511,113 +616,197 @@
     function loadMap() {
         if (mapInitialized) {
             console.warn("Map already initialized. Skipping re-initialization.");
+            // If needed, you could clear existing markers here before adding new ones
+            // Or, just return if the map state should persist across logins/actions
             return;
         }
 
-        const defaultLat = 10.6667;
-        const defaultLng = -61.5167;
-        mapInstance = L.map('map').setView([defaultLat, defaultLng], 13);
-        mapInitialized = true;
+        console.log("Initializing map...");
+        const defaultLat = 10.6667; // Port of Spain Latitude
+        const defaultLng = -61.5167; // Port of Spain Longitude
+        try {
+             mapInstance = L.map('map', { // Add options if needed
+                // Example: Set min/max zoom
+                // minZoom: 10,
+                // maxZoom: 18
+            }).setView([defaultLat, defaultLng], 13); // Default view before geolocation
+             mapInitialized = true; // Set flag after successful map creation
+             console.log("Map instance created.");
+        } catch (e) {
+             console.error("Failed to initialize Leaflet map:", e);
+             alert("Error creating the map display.");
+             return; // Stop if map fails
+        }
 
+
+        // Add Tile Layer (Map background)
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-            maxZoom: 19
+            maxZoom: 19, // Standard max zoom for OSM
+            minZoom: 5 // Prevent zooming out too far if desired
         }).addTo(mapInstance);
+        console.log("Tile layer added.");
 
+        // Get user's location and center map (async)
         getUserLocation(mapInstance);
 
-        // *** Updated estimatedPrices object ***
-        const estimatedPrices = {
-            "Buzo Osteria Italiana": "$$$", "Krave": "$$$", "Luce": "$$$",
-            "Seahorse Restaurant & Bar": "$$$", "Bottles And Bites": "$$$", "The Meena House": "$$$",
-            "Sails Restaurant & Pub": "$$", "North Sea Restaurant Co. Ltd.": "$$", "Luna Restaurant": "$$",
-            "The Deck": "$$", "Big G Gyros": "$$", "Kebbab & Shawarma Station": "$$", "Burger Joint": "$$",
-            "D Ultimate StrEAT Vibe": "$$", "Pizza Hut": "$$", "Mario's Pizza": "$$", "Rituals Coffee House": "$$",
-            "Chaud Cafe & Wine Bar": "$$$",
-            "KO COMBOS": "$", "Royal Castle": "$", // Kept others at $
-            // Updated to $$ as requested
-            "Subway": "$$",
-            "Dairy Queen": "$$",
-            "Mr Chows Smoke House": "$$",
-            "Burger King": "$$",
-            "McDonald's": "$$"
-        };
-        // *** End of updated estimatedPrices object ***
+        // --- Price Estimation Logic ---
+        // Define estimated price ranges (customize as needed)
+        // Key: Exact name from OpenStreetMap data (case-sensitive usually)
+        // Value: '$', '$$', '$$$', '$$$$'
+         const estimatedPrices = {
+             // High-end ($$$$) - Note: Adjusted $$$ from original to $$$$ based on code logic later
+            "Buzo Osteria Italiana": "$$$", // Will become $$$$
+            "Krave": "$$$",                 // Will become $$$$
+            "Luce": "$$$",                  // Will become $$$$
+            "Chaud Cafe & Wine Bar": "$$$", // Will become $$$$
+            "The Meena House": "$$$",       // Will become $$$$
+            "Seahorse Restaurant & Bar": "$$$", // Will become $$$$
+            "Bottles And Bites": "$$$",     // Will become $$$$
 
+            // Mid-range ($$$) - Default for 'restaurant' amenity
+             // Add specific overrides if known
+
+            // Lower Mid-range ($$) - Default for 'cafe' amenity
+            "Sails Restaurant & Pub": "$$",
+            "North Sea Restaurant Co. Ltd.": "$$",
+            "Luna Restaurant": "$$",
+            "The Deck": "$$",
+            "Big G Gyros": "$$",
+            "Kebbab & Shawarma Station": "$$",
+            "Burger Joint": "$$",
+            "D Ultimate StrEAT Vibe": "$$",
+            "Pizza Hut": "$$",
+            "Mario's Pizza": "$$",
+            "Rituals Coffee House": "$$",
+            "Subway": "$$",         // Explicitly set
+            "Dairy Queen": "$$",    // Explicitly set
+            "Mr Chows Smoke House": "$$", // Explicitly set
+            "Burger King": "$$",    // Explicitly set
+            "McDonald's": "$$",   // Explicitly set
+            // Add other known $$ places
+
+             // Budget ($) - Default for 'fast_food' amenity
+            "KO COMBOS": "$",
+            "Royal Castle": "$",
+            // Add other known $ places
+         };
+
+        // --- Fetch Data from OpenStreetMap using Overpass API ---
         const overpassUrl = 'https://overpass-api.de/api/interpreter';
-        // Updated Bounding box coordinates to include Trinidad AND Tobago: south, west, north, east
-        const bbox = "10.0,-61.95,11.4,-60.4"; // Extended North to 11.4 and East to -60.4
+        // Bounding box for Trinidad AND Tobago [South, West, North, East]
+        // Adjusted slightly for broader coverage including Tobago coasts
+        const bbox = "10.0,-61.95,11.4,-60.4";
         const query = `
         [out:json][timeout:45];
         (
-        node["amenity"~"^(restaurant|fast_food|food_court|cafe)$"](${bbox});
-        way["amenity"~"^(restaurant|fast_food|food_court|cafe)$"](${bbox});
-        relation["amenity"~"^(restaurant|fast_food|food_court|cafe)$"](${bbox});
+          // Query for nodes, ways, and relations matching amenities
+          node["amenity"~"^(restaurant|fast_food|food_court|cafe)$"](${bbox});
+          way["amenity"~"^(restaurant|fast_food|food_court|cafe)$"](${bbox});
+          relation["amenity"~"^(restaurant|fast_food|food_court|cafe)$"](${bbox});
         );
-        out center;
+        // Output geometry for ways/relations and standard output for nodes
+        out center; // Use 'center' for ways/relations to get a single point
         >;
-        out skel qt;
+        out skel qt; // Standard output format
         `;
 
-        console.log("Fetching data from Overpass...");
+        console.log("Fetching data from Overpass API...");
         fetch(overpassUrl, {
             method: 'POST',
-            body: `data=${encodeURIComponent(query)}`
+            // Use URLSearchParams for cleaner body construction
+            body: new URLSearchParams({ data: query })
         })
         .then(response => {
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                // Throw an error with status text for better debugging
+                throw new Error(`Overpass API request failed: ${response.status} ${response.statusText}`);
             }
-            return response.json();
+            return response.json(); // Parse JSON response
         })
         .then(data => {
             console.log("Overpass Data Received:", data);
+            if (!data || !data.elements) {
+                 console.warn("No elements found in Overpass response.");
+                 return;
+            }
+
             const places = data.elements;
-            const markers = L.layerGroup().addTo(mapInstance);
+            const markers = L.layerGroup().addTo(mapInstance); // Create a layer group for markers
             let markersAdded = 0;
+            let skippedCount = 0;
 
             places.forEach(place => {
                 let lat, lon;
-                const amenityType = place.tags?.amenity;
+                const tags = place.tags || {}; // Ensure tags object exists
+                const amenityType = tags.amenity;
 
-                if (place.type === 'node') {
+                // Determine coordinates: use node coords or center of way/relation
+                if (place.type === 'node' && place.lat && place.lon) {
                     lat = place.lat;
                     lon = place.lon;
-                } else if (place.center) {
+                } else if (place.center && place.center.lat && place.center.lon) { // For ways/relations with 'out center;'
                     lat = place.center.lat;
                     lon = place.center.lon;
+                } else if (place.type === 'way' || place.type === 'relation') {
+                    // Fallback if 'out center' didn't work or wasn't used, try to find a node within it
+                    // This is more complex and might require another query or careful parsing
+                    // console.log(`Skipping way/relation ${place.id} without center coordinates.`);
+                    skippedCount++;
+                    return; // Skip this element for now if no simple coordinates
+                } else {
+                     // console.log(`Skipping element ${place.id} of type ${place.type} without coordinates.`);
+                     skippedCount++;
+                     return; // Skip if no coordinates found
                 }
 
+
+                // Ensure we have coordinates and an amenity type
                 if (lat && lon && amenityType) {
-                    const name = place.tags?.name || `Unnamed ${amenityType.replace('_', ' ')}`;
-                    const type = amenityType === "fast_food" ? "🍔 Fast Food" :
-                                 amenityType === "food_court" ? "🍽️ Food Court" :
-                                 amenityType === "cafe" ? "☕ Cafe" :
-                                 "🍴 Restaurant";
+                    const name = tags.name || `Unnamed ${amenityType.replace('_', ' ')}`; // Handle missing names
+                    const placeIdentifier = place.id; // Use OSM ID as a unique identifier
 
-                    // --- Calculate Cost ---
+                    // --- Determine Display Type ---
+                    let displayType;
+                    switch(amenityType) {
+                        case "fast_food": displayType = "🍔 Fast Food"; break;
+                        case "food_court": displayType = "🍽️ Food Court"; break;
+                        case "cafe": displayType = "☕ Cafe"; break;
+                        case "restaurant":
+                        default: displayType = "🍴 Restaurant"; break; // Default to restaurant
+                    }
+
+                    // --- Determine Cost ---
                     let cost;
-                    if (estimatedPrices.hasOwnProperty(name)) {
-                        const original = estimatedPrices[name];
-                        cost = (original === "$$$") ? "$$$$" : original; // Apply $$$ -> $$$$ rule if needed
-                    }
-                    // Fallback based on amenity type if not in estimatedPrices
-                    else if (amenityType === "restaurant") {
-                        cost = "$$$";
-                    } else if (amenityType === "fast_food") {
-                        cost = "$";
-                    } else if (amenityType === "cafe") {
-                        cost = "$$";
+                    const normalizedName = name.trim(); // Trim whitespace from name for matching
+                    if (estimatedPrices.hasOwnProperty(normalizedName)) {
+                        cost = estimatedPrices[normalizedName];
+                        // Apply the $$$ -> $$$$ rule specifically here if needed by logic
+                        // Example: if (cost === "$$$") cost = "$$$$"; - but your current logic handles this below
                     } else {
-                        cost = "$$"; // Default fallback
+                        // Fallback cost based on amenity type if not in specific list
+                        switch(amenityType) {
+                            case "fast_food": cost = "$"; break;
+                            case "cafe": cost = "$$"; break;
+                             case "food_court": cost = "$$"; break; // Assign default for food court
+                            case "restaurant":
+                            default: cost = "$$$"; break; // Default for restaurant
+                        }
                     }
-                    // --- End Calculate Cost ---
+                    // *** IMPORTANT: Apply the transformation rule AFTER lookup/default ***
+                    // This matches the logic in your provided `estimatedPrices` where $$$ was used as the key
+                    // but the intent seemed to display it as $$$$ for certain places.
+                     if (estimatedPrices.hasOwnProperty(normalizedName) && estimatedPrices[normalizedName] === "$$$") {
+                         cost = "$$$$";
+                     }
 
-                    const placeIdentifier = place.id;
 
+                    // --- Create Popup Content ---
+                    // Fetch existing rating if possible (more advanced, requires async fetch per marker)
+                    // For now, just include the rating stars structure.
                     const popupContent = `
                         <b>${name}</b> <br>
-                        ${type} - <span style="color: green; font-weight: bold;">${cost}</span>
+                        ${displayType} - <span style="color: green; font-weight: bold;">${cost}</span>
                         <div class="rating-container">
                             <div class="star-rating" data-place-id="${placeIdentifier}">
                                 <span class="star" data-value="1">★</span><span class="star" data-value="2">★</span><span class="star" data-value="3">★</span><span class="star" data-value="4">★</span><span class="star" data-value="5">★</span>
@@ -626,21 +815,36 @@
                         </div>
                     `;
 
-                    const marker = L.marker([lat, lon]).bindPopup(popupContent);
-                    markers.addLayer(marker);
-                    markersAdded++;
+                    // --- Create and Add Marker ---
+                     try {
+                        const marker = L.marker([lat, lon])
+                                     .bindPopup(popupContent);
+                        markers.addLayer(marker); // Add to the layer group
+                        markersAdded++;
+                    } catch (markerError) {
+                         console.error(`Error creating marker for ${name} (${placeIdentifier}):`, markerError);
+                         skippedCount++;
+                    }
+
+                } else {
+                     // Log elements skipped due to missing essential data (lat/lon or amenity tag)
+                     // console.log(`Skipping element ${place.id} - Missing Lat/Lon or Amenity Tag.`);
+                     skippedCount++;
                 }
             });
 
-            console.log(`Processed ${places.length} elements. Added ${markersAdded} markers to the map.`);
+            console.log(`Processed ${places.length} elements. Added ${markersAdded} markers. Skipped ${skippedCount} elements.`);
              if (places.length > 0 && markersAdded === 0) {
-                   console.warn("No markers added. Check Overpass data or filtering logic.");
-             } else if (markersAdded < places.length) {
-                   console.log(`Note: ${places.length - markersAdded} elements were skipped.`);
+                 console.warn("Data received from Overpass, but no valid markers could be added. Check data structure, coordinate extraction, or filtering logic.");
+                 // alert("Found locations, but couldn't display them on the map.");
+             } else if (markersAdded === 0) {
+                  console.log("No locations matching the criteria were found in the specified area.");
+                  // alert("No restaurants/cafes found in the map area.");
              }
-        }).catch(error => {
-            console.error("Map loading/Overpass error:", error);
-            alert("Could not load restaurant data. " + error.message);
+        })
+        .catch(error => {
+            console.error("Failed to fetch or process Overpass data:", error);
+            alert(`Could not load restaurant data. Please check your connection or try again later. Error: ${error.message}`);
         });
     }
 
@@ -649,19 +853,30 @@
         const images = document.querySelectorAll('#background-carousel img');
         if (images.length === 0) {
             console.warn("No images found for background carousel.");
-            return;
+            return; // Exit if no images
         }
         let currentIndex = 0;
 
+        // Ensure the first image is active initially
+        images.forEach((img, index) => {
+            img.classList.toggle('active', index === 0);
+        });
+
+
         setInterval(() => {
-            images[currentIndex].classList.remove('active');
-            currentIndex = (currentIndex + 1) % images.length;
-            images[currentIndex].classList.add('active');
-        }, 4000);
+            images[currentIndex].classList.remove('active'); // Fade out current
+            currentIndex = (currentIndex + 1) % images.length; // Move to next index, loop around
+            images[currentIndex].classList.add('active'); // Fade in next
+        }, 4000); // Change image every 4 seconds
     }
 
-    // --- Initial Setup ---
-    carousel();
+    // --- Initial Setup on Page Load ---
+    document.addEventListener('DOMContentLoaded', (event) => {
+         carousel(); // Start the background image carousel
+         // Don't call loadMap() here; it should only be called after successful login.
+         // setupRatingStars(); // Set up rating listeners immediately (or wait until login?)
+         // Setting up listeners immediately is fine as they use event delegation.
+    });
 
   </script>
 </body>
