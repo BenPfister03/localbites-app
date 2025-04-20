@@ -68,16 +68,19 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;
+      width: 380px;
+      height: auto;
+      min-height: 400px;
       backdrop-filter: brightness(0.7) blur(3px);
       border-radius: 20px;
-      max-width: 420px;
-      margin: auto;
       background-color: rgba(255, 255, 255, 0.9);
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
       padding: 40px 30px;
       transition: transform 0.5s ease, opacity 0.5s ease;
-      position: relative;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       z-index: 5;
     }
 
@@ -210,13 +213,26 @@
     <img src="https://cdn.drop.media/localbites-app/571d65b4-8105-4a72-9214-17e576bf3e17.jpeg" />
   </div>
 
-  <h1 id="header">🍴 LocalBites - Neighborhood Restaurant Explorer</h1>
   <div id="login-container">
     <h2>LocalBites</h2>
     <p>Discover nearby restaurants, filter by needs, save favorites, and leave ratings.</p>
-    <input type="text" id="username" placeholder="Username" />
-    <input type="password" id="password" placeholder="Password" />
-    <button onclick="login()">Login</button>
+
+
+    <div id="login-form">
+      <input type="text" id="username" placeholder="Username" />
+      <input type="password" id="password" placeholder="Password" />
+      <button onclick="login()">Login</button>
+      <button class="secondary-btn" onclick="showSignup()">Sign Up</button>
+    </div>
+
+
+    <div id="signup-form" style="display:none;">
+      <input type="text" id="signup-username" placeholder="Username" />
+      <input type="password" id="signup-password" placeholder="Password" />
+      <input type="password" id="signup-confirm-password" placeholder="Confirm Password" />
+      <button onclick="signup()">Sign Up</button>
+      <button class="secondary-btn" onclick="showLogin()">Back to Login</button>
+    </div>
   </div>
   <div id="map"></div>
 
@@ -242,6 +258,15 @@
     // --- Global Variables ---
     let mapInstance = null;
     let mapInitialized = false;
+
+    function showSignup() {
+      document.getElementById('login-form').style.display = 'none';
+      document.getElementById('signup-form').style.display = 'block';
+    }
+    function showLogin() {
+      document.getElementById('signup-form').style.display = 'none';
+      document.getElementById('login-form').style.display = 'block';
+    }
 
     // --- Login Function ---
     function login() {
@@ -284,6 +309,69 @@
             alert(message);
         });
     }
+
+    function signup() {
+      const username = document.getElementById('signup-username').value.trim();
+      const password = document.getElementById('signup-password').value;
+      const confirmPassword = document.getElementById('signup-confirm-password').value;
+
+      if (!username || !password || !confirmPassword) {
+        alert("Please fill all fields!");
+        return;
+      }
+
+      if (username.length < 4) {
+        alert("Username must be at least 4 characters");
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        alert("Passwords don't match!");
+        return;
+      }
+
+      if (password.length < 6) {
+        alert("Password must be at least 6 characters");
+        return;
+      }
+
+      db.collection('users')
+        .where('username', '==', username)
+        .get()
+        .then(snapshot => {
+          if (!snapshot.empty) {
+            throw new Error('username-exists');
+          }
+
+
+          const dummyEmail = `${username}@${username}.dummy`; 
+          return auth.createUserWithEmailAndPassword(dummyEmail, password);
+        })
+        .then(userCredential => {
+          return db.collection('users').doc(userCredential.user.uid).set({
+            username: username,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        })
+        .then(() => {
+          alert("Account created successfully! You can now login.");
+          showLogin();
+          document.getElementById('signup-username').value = '';
+          document.getElementById('signup-password').value = '';
+          document.getElementById('signup-confirm-password').value = '';
+        })
+        .catch(error => {
+          console.error("Signup failed:", error);
+          let message = "Signup failed. Please try again.";
+          if (error.message === 'username-exists') {
+            message = "Username already taken. Please choose another.";
+          } else if (error.code === 'auth/weak-password') {
+            message = "Password is too weak (min 6 chars).";
+          }
+          alert(message);
+        });
+    }
+
 
     // --- Rating Stars Interaction Setup ---
     function setupRatingStars() {
