@@ -310,8 +310,66 @@
         });
     }
 
-    function signup() { // implement
-      
+    function signup() {
+      const username = document.getElementById('signup-username').value.trim();
+      const password = document.getElementById('signup-password').value;
+      const confirmPassword = document.getElementById('signup-confirm-password').value;
+
+      if (!username || !password || !confirmPassword) {
+        alert("Please fill all fields!");
+        return;
+      }
+
+      if (username.length < 4) {
+        alert("Username must be at least 4 characters");
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        alert("Passwords don't match!");
+        return;
+      }
+
+      if (password.length < 6) {
+        alert("Password must be at least 6 characters");
+        return;
+      }
+
+      db.collection('users')
+        .where('username', '==', username)
+        .get()
+        .then(snapshot => {
+          if (!snapshot.empty) {
+            throw new Error('username-exists');
+          }
+
+
+          const dummyEmail = `${username}@${username}.dummy`; 
+          return auth.createUserWithEmailAndPassword(dummyEmail, password);
+        })
+        .then(userCredential => {
+          return db.collection('users').doc(userCredential.user.uid).set({
+            username: username,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        })
+        .then(() => {
+          alert("Account created successfully! You can now login.");
+          showLogin();
+          document.getElementById('signup-username').value = '';
+          document.getElementById('signup-password').value = '';
+          document.getElementById('signup-confirm-password').value = '';
+        })
+        .catch(error => {
+          console.error("Signup failed:", error);
+          let message = "Signup failed. Please try again.";
+          if (error.message === 'username-exists') {
+            message = "Username already taken. Please choose another.";
+          } else if (error.code === 'auth/weak-password') {
+            message = "Password is too weak (min 6 chars).";
+          }
+          alert(message);
+        });
     }
 
 
