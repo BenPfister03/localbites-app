@@ -1,6 +1,6 @@
 # 🍽️ LocalBites - Neighborhood Restaurant Explorer
 
-**Discover local restaurants based on your location, dietary needs, and budget. Save favorites, rate spots, and explore popular areas around you — all from your browser.**
+**Discover local restaurants based on your location, save favorites, rate spots, and explore popular areas around you — all from your browser.**
 
 ---
 
@@ -13,7 +13,7 @@
 
 ## 🔑 Test Login Credentials
 
-- **Email:** `bob@example.com`  
+- **User:** `bob`  
 - **Password:** `bobpass`
 
 ---
@@ -21,14 +21,10 @@
 ## ✨ Features
 
 - 🔐 **User Authentication** (Login, Logout, Profile)
-- 📍 **Location-Based Restaurant Discovery** via Google Maps
-- 🍔 **Filters**: Dietary options, price range, and distance
-- ⭐ **Quick Rate** system (★★★★★)
-- ❤️ **Favorites** list saved to user profile
-- 💬 **Short Tips** (e.g., “Try the tacos!”)
-- 📊 **Data Visualization**: 
-  - Most-visited cuisines (bar chart)
-  - Heatmap of popular areas (mock data)
+- 📍 **Location-Based Restaurant Discovery** via Open Street Maps
+- 🍔 **Filters**: Types of restaurants, price range, and distance
+- ⭐ **Quick Rate** system (★★★★★) 
+- ❤️ **Favorites** list saved to user profile Filter your rated places by price and rating
 
 ---
 
@@ -38,10 +34,9 @@
 |--------------|-------------|
 | Frontend     | HTML, CSS, JavaScript |
 | UI Libraries | (Optional) Tailwind or Bootstrap |
-| Maps         | Google Maps JavaScript API |
+| Maps         | Open Street Maps JavaScript API |
 | Backend      | Firebase Authentication & Firestore |
 | Hosting      | Firebase Hosting |
-| Analytics    | Mock Data & Custom Charts |
 
 ---
 
