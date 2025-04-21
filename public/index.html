@@ -651,7 +651,7 @@
   <div id="header">
     <h1>LocalBites - Neighborhood Restaurant Explorer</h1>
     <div id="header-right-controls">
-      <button id="show-rated-places-button">My ratings</button>
+      <button id="show-rated-places-button">My Ratings</button>
       <div id="user-menu-container">
         <img id="user-avatar" src="" alt="User Avatar">
         <span id="header-username"></span>
@@ -1387,7 +1387,7 @@
               lat: defaultLat,
               lng: defaultLng
             }; // Store default location if geolocation fails
-            // *** Ensure circle is null if geolocation fails ***
+            // *** Ensure circle is null if geolocation not supported ***
             userLocationCircle = null;
           }, { // Geolocation options
             enableHighAccuracy: true, // Try for more accuracy
@@ -1670,6 +1670,12 @@
         }
 
 
+        // *** Filter out places without a valid name ***
+        if (typeof name !== 'string' || name.trim() === '' || name.toLowerCase() === 'undefined') {
+           return false;
+        }
+
+
         // *** Filter by Type - Modified logic to include food_court under fast_food ***
         if (typeFilter !== 'all') {
           if (typeFilter === 'fast_food') {
@@ -1698,11 +1704,6 @@
             if (distance > distanceFilterValue) {
                 return false;
             }
-        }
-
-        // Basic check for valid coordinates and name (redundant with query filter but safe)
-        if (typeof name !== 'string' || name.trim() === '' || name.toLowerCase() === 'undefined') {
-          return false;
         }
 
 
@@ -1830,7 +1831,7 @@
         distanceValueDisplay.textContent = `Location needed for distance`; // Or a specific error message
       }
 
-      // Ensure the circle is managed correctly after reset
+      // Ensure the circle is managed correctly after reset (will remove it if slider is max)
       manageDistanceCircle();
 
 
@@ -1980,23 +1981,110 @@
           viewOnMapLink.onclick = (e) => {
             e.preventDefault(); // Stop the default link click
             showMap(); // Switch back to map view
-            // Find the marker on the map and open its popup
-            if (mapInstance) {
-              // Iterate through layers to find the marker
-              mapInstance.eachLayer(layer => {
-                if (layer instanceof L.Marker) {
-                  // Access the popup content or a stored placeId if available
-                  // This assumes the placeId is somehow associated with the marker/popup
-                  if (layer.getPopup() && layer.getPopup().getContent().includes(`data-place-id="${rating.placeId}"`)) {
-                    mapInstance.setView(layer.getLatLng(), 15); // Center map on marker
-                    layer.openPopup(); // Open the marker's popup
-                  }
-                }
-              });
+
+            // *** Clear existing markers and add markers ONLY FOR PLACES WITH NAMES back temporarily ***
+            if (mapInstance && mapInstance.markersLayer) {
+                mapInstance.removeLayer(mapInstance.markersLayer); // Clear existing filtered markers
             }
+            mapInstance.markersLayer = L.layerGroup().addTo(mapInstance); // Create a new layer group
+
+            let targetMarker = null; // To store the marker we are looking for
+
+            // Add ONLY named places back as markers temporarily
+            allPlacesData.forEach(place => {
+                let lat, lon;
+                if (place.type === 'node' && place.lat && place.lon) {
+                    lat = place.lat;
+                    lon = place.lon;
+                } else if (place.center && place.center.lat && place.center.lon) {
+                    lat = place.center.lat;
+                    lon = place.center.lon;
+                } else {
+                    return; // Skip if coordinates are bad
+                }
+
+                const tags = place.tags || {};
+                const name = tags.name;
+                const placeIdentifier = place.id;
+                 const amenityType = tags.amenity; // Needed for getEstimatedCost
+
+
+                // *** Check for a valid name before adding the marker ***
+                if (typeof name !== 'string' || name.trim() === '' || name.toLowerCase() === 'undefined') {
+                   return; // Skip this place if it doesn't have a valid name
+                }
+
+
+                const estimatedCost = getEstimatedCost(name, amenityType); // Reuse existing function
+
+                 let displayType; // Reuse existing logic
+                  switch (amenityType) {
+                    case "fast_food":
+                      displayType = "🍔 Fast Food";
+                      break;
+                    case "food_court":
+                      displayType = "🍽️ Food Court";
+                      break;
+                    case "cafe":
+                      displayType = "☕ Cafe";
+                      break;
+                    case "restaurant":
+                    default:
+                      displayType = "🍴 Restaurant";
+                      break;
+                  }
+
+                const safeName = name; // Already validated
+                const safeDisplayType = displayType || 'Unknown Type';
+                const safeCost = estimatedCost || 'N/A';
+
+
+                const popupContent = `
+                   <b>${safeName}</b> <br>
+                   ${safeDisplayType} - <span style="color: green; font-weight: bold;">${safeCost}</span>
+                   <div class="rating-container">
+                      <div class="star-rating" data-place-id="${placeIdentifier}">
+                           <span class="star" data-value="1">★</span><span class="star" data-value="2">★</span><span class="star" data-value="3">★</span><span class="star" data-value="4">★</span><span class="star" data-value="5">★</span>
+                       </div>
+                      <div class="rating-text">Rate this place</div>
+                   </div>
+               `;
+
+                try {
+                    const marker = L.marker([lat, lon]).bindPopup(popupContent);
+                     mapInstance.markersLayer.addLayer(marker); // Add to the new layer group
+
+                    // Check if this is the target marker by comparing placeId
+                    if (placeIdentifier.toString() === rating.placeId) {
+                       targetMarker = marker; // Store reference to the target marker
+                    }
+
+                } catch (markerError) {
+                    console.error(`Error creating temporary marker for ${safeName} (${placeIdentifier}):`, markerError);
+                }
+            });
+
+            // Now that only named markers are added, find the target one and open its popup
+            if (targetMarker) {
+               mapInstance.setView(targetMarker.getLatLng(), 15); // Center map on marker
+               targetMarker.openPopup(); // Open the marker's popup
+            } else {
+                 // Added a more specific message if the rated place itself had no name in the data
+                console.warn(`Target marker with placeId ${rating.placeId} not found after adding named markers.`);
+                alert(`Could not find "${rating.placeName || 'this place'}" on the map (details might be incomplete).`);
+            }
+
+            // Note: The map filters UI (dropdowns and slider) will retain their previous state.
+            // The map itself will now show all *named* markers until the user applies filters again.
           };
           // Append the "View on Map" link inside the rating-controls div for better layout
           listItem.querySelector('.rating-controls').appendChild(viewOnMapLink);
+        } else {
+             // Optional: Add a message to the list item if map data wasn't found for this rated place
+             const noMapDataMessage = document.createElement('small');
+             noMapDataMessage.style.color = 'red'; // Style to make it noticeable
+             noMapDataMessage.textContent = ' (Map data unavailable)';
+             listItem.querySelector('.place-info').appendChild(noMapDataMessage); // Add to place info
         }
 
 
