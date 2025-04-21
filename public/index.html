@@ -333,11 +333,6 @@
       /* Keep outline when selected */
     }
 
-    .star-rating .star:active {
-      transform: scale(0.95);
-      /* Slight shrink on click */
-    }
-
     .rating-text {
       margin-top: 5px;
       font-size: 14px;
@@ -648,7 +643,7 @@
     <img src="https://cdn.drop.media/localbites-app/c9f7effa-d919-4293-bf8c-1d8ccdcda269.jpeg" />
     <img src="https://cdn.drop.media/localbites-app/4e3e4c7f-3028-4e5c-a185-10e26f0706e2.jpeg" />
     <img src="https://cdn.drop.media/localbites-app/6f597dd7-c241-4b60-9305-366e2ce0acf5.jpeg" />
-    <img src="https://cdn.drop.media/localbites-app/a8554f59-ef50-4fd8-b4fd-a6c2f95dae0d.jpeg" />
+    <img src="https://cdn.drop.media/localbites-app/a8554f59-ef50-4fd8-b4fd-a6c2f935dae0d.jpeg" />
     <img src="https://cdn.drop.media/localbites-app/99f5591d-024d-4b2e-9f1d-f853bea85e2b.jpeg" />
     <img src="https://cdn.drop.media/localbites-app/571d65b4-8105-4a72-9214-17e576bf3e17.jpeg" />
   </div>
@@ -658,7 +653,7 @@
     <div id="header-right-controls">
       <button id="show-rated-places-button">My Ratings</button>
       <div id="user-menu-container">
-        <img id="user-avatar" src="https://cdn.drop.media/localbites-app/default-avatar.png" alt="User Avatar">
+        <img id="user-avatar" src="" alt="User Avatar">
         <span id="header-username"></span>
         <div id="logout-option">
           Logout
@@ -698,8 +693,8 @@
       <option value="all">All Types</option>
       <option value="restaurant">🍴 Restaurant</option>
       <option value="cafe">☕ Cafe</option>
-      <option value="fast_food">🍔 Fast Food</option>
-    </select>
+      <option value="fast_food">🍔 Fast Food & 🍽️ Food Court</option>
+      </select>
 
     <label for="map-price-filter">Price Range:</label>
     <select id="map-price-filter">
@@ -711,7 +706,7 @@
     </select>
 
     <label for="map-distance-slider">Distance from You:</label>
-    <input type="range" id="map-distance-slider" min="1" max="10" value="10" disabled>
+    <input type="range" id="map-distance-slider" min="1" max="11" value="10" disabled>
     <div id="map-distance-value" class="slider-value">Location needed for distance</div>
     <button id="apply-map-filters-button">Apply Filters</button>
     <button id="reset-map-filters-button" class="reset-button">Reset Filters</button>
@@ -736,10 +731,10 @@
       <select id="rating-filter">
         <option value="all">All Ratings</option>
         <option value="5">5 Stars</option>
-        <option value="4">4 Stars & Up</option>
-        <option value="3">3 Stars & Up</option>
-        <option value="2">2 Stars & Up</option>
-        <option value="1">1 Star & Up</option>
+        <option value="4">4 Stars</option>
+        <option value="3">3 Stars</option>
+        <option value="2">2 Stars</option>
+        <option value="1">1 Star</option>
       </select>
     </div>
 
@@ -782,6 +777,8 @@
     let allPlacesDataLoadedPromise = null;
     // Store the user's current location for distance filtering
     let userLocation = null;
+    // Store the Leaflet circle for the distance filter
+    let userLocationCircle = null;
 
 
     // --- UI Toggling Functions ---
@@ -844,12 +841,16 @@
         await allPlacesDataLoadedPromise;
         console.log("allPlacesData loaded. Proceeding to load rated places.");
 
+        // *** Call loadRatedPlaces and then apply the current filters ***
+        await loadRatedPlaces(); // Wait for ratings to load
+        applyFilters(); // Apply filters based on current dropdown selections
+
         loadingIndicator.style.display = 'none'; // Hide loading indicator
         controls.style.display = 'block'; // Show controls
 
-        loadRatedPlaces(); // Load and display the rated places
+
       } catch (error) {
-        console.error("Error loading allPlacesData:", error);
+        console.error("Error loading allPlacesData or rated places:", error);
         loadingIndicator.textContent = "Error loading place data.";
         backButton.style.display = 'block'; // Still show back button
       }
@@ -884,6 +885,8 @@
               console.log("Firestore username found:", username);
               // Now update the UI with the actual username
               document.getElementById('header-username').textContent = username;
+              // *** Set the DiceBear avatar URL using the user ID as the seed ***
+              document.getElementById('user-avatar').src = `https://api.dicebear.com/8.x/bottts/svg?seed=${userId}`;
               document.getElementById('user-menu-container').style.display = 'flex'; // Show user section
               document.getElementById('show-rated-places-button').style.display = 'inline-block'; // Show My Ratings button
 
@@ -891,6 +894,8 @@
             } else {
               console.warn("No user document found in Firestore for UID:", userId);
               document.getElementById('header-username').textContent = 'User'; // Default name
+              // *** Set a default DiceBear avatar if username not found ***
+              document.getElementById('user-avatar').src = `https://api.dicebear.com/8.x/bottts/svg?seed=default-user`;
               document.getElementById('user-menu-container').style.display = 'flex'; // Still show user section with default name
               document.getElementById('show-rated-places-button').style.display = 'inline-block'; // Show My Ratings button
 
@@ -921,13 +926,34 @@
             // Initialize distance slider value display and disable it initially
             const distanceSlider = document.getElementById('map-distance-slider');
             const distanceValueDisplay = document.getElementById('map-distance-value');
-            distanceSlider.disabled = true; // Disable by default
-            distanceValueDisplay.textContent = `Location needed for distance`; // Initial text
+            distanceSlider.disabled = false; // Disable by default
+            // *** Set initial value to 10 (or your preferred default local range) ***
+            distanceSlider.value = 10;
+            // *** Update initial display text based on value ***
+            distanceValueDisplay.textContent = `${distanceSlider.value} km`;
 
 
             // Add event listener for slider value change (only active when enabled)
             distanceSlider.addEventListener('input', function() {
-              distanceValueDisplay.textContent = `${this.value} km`;
+              // *** Update display text dynamically, showing "All" for max value ***
+              if (parseFloat(this.value) === parseFloat(this.max)) {
+                distanceValueDisplay.textContent = `All of T&T`;
+              } else {
+                distanceValueDisplay.textContent = `${this.value} km`;
+              }
+
+              // Update circle radius immediately on slide if circle exists and not showing all
+              if (userLocation && userLocationCircle && parseFloat(this.value) < parseFloat(this.max)) {
+                userLocationCircle.setRadius(this.value * 1000); // Radius in meters
+              } else if (userLocationCircle && parseFloat(this.value) === parseFloat(this.max)) {
+                // If slider moves to 'All', remove the circle immediately
+                if (mapInstance.hasLayer(userLocationCircle)) {
+                  mapInstance.removeLayer(userLocationCircle);
+                }
+              }
+
+              // Filters are applied when the "Apply Filters" button is clicked, not on every slide
+              // unless you want live filtering, which would impact performance for many markers.
             });
 
 
@@ -1069,16 +1095,29 @@
 
         // Clear user-specific data/UI
         document.getElementById('header-username').textContent = ''; // Clear username
+        document.getElementById('user-avatar').src = ''; // Clear avatar source on logout
         document.getElementById('show-rated-places-button').style.display = 'none'; // Hide My Ratings button
         allPlacesData = []; // Clear map data
         currentUserRatings = []; // Clear ratings
         mapInitialized = false; // Reset map flag
         if (mapInstance) {
+          if (userLocationCircle) { // Remove circle if it exists
+            mapInstance.removeLayer(userLocationCircle);
+            userLocationCircle = null;
+          }
           mapInstance.remove(); // Remove map instance to clear layers/markers
           mapInstance = null; // Clear map instance
         }
         allPlacesDataLoadedPromise = null; // Reset promise
         userLocation = null; // Clear user location
+
+        // Reset distance slider and display
+        const distanceSlider = document.getElementById('map-distance-slider');
+        const distanceValueDisplay = document.getElementById('map-distance-value');
+        distanceSlider.disabled = true;
+        // *** Reset to 10km on logout ***
+        distanceSlider.value = 10;
+        distanceValueDisplay.textContent = `Location needed for distance`;
 
 
       }).catch((error) => {
@@ -1221,7 +1260,7 @@
             // Re-display the list to reflect the change visually
             // Only re-display if the rated places list is currently visible
             if (document.getElementById('rated-places-container').style.display !== 'none') {
-              displayFilteredPlaces(currentUserRatings);
+              applyFilters(); // Apply current filters after rating update
             }
 
           }
@@ -1259,8 +1298,10 @@
             }; // Store user location
 
             // *** Enable the distance slider and update display on successful geolocation ***
-            distanceSlider.disabled = false;
-            distanceSlider.value = 10; // Set a default initial value, e.g., max range
+            distanceSlider.disabled = false; // Disable by default
+            // *** Set initial value to 10 (or your preferred default local range) ***
+            distanceSlider.value = 10;
+            // *** Update initial display text based on value ***
             distanceValueDisplay.textContent = `${distanceSlider.value} km`;
 
 
@@ -1284,6 +1325,21 @@
 
             mapToUse.setView([userLat, userLng], 14);
             // Center map and zoom in
+
+            // *** Add the initial radius circle if not at "All" setting ***
+            const initialRadiusKm = parseFloat(distanceSlider.value);
+            const maxDistanceKm = parseFloat(distanceSlider.max);
+            if (userLocation && initialRadiusKm < maxDistanceKm) { // Only draw if not at max range initially
+              userLocationCircle = L.circle([userLocation.lat, userLocation.lng], {
+                color: 'blue', // Color of the circle
+                fillColor: '#30f', // Fill color with some transparency
+                fillOpacity: 0.2, // Opacity of the fill
+                radius: initialRadiusKm * 1000 // Radius in meters
+              }).addTo(mapToUse);
+              console.log(`Initial radius circle drawn with radius: ${initialRadiusKm} km`);
+            }
+
+
           },
           (error) => {
             console.error("Geolocation error:", error.code, error.message);
@@ -1331,6 +1387,8 @@
               lat: defaultLat,
               lng: defaultLng
             }; // Store default location if geolocation fails
+            // *** Ensure circle is null if geolocation fails ***
+            userLocationCircle = null;
           }, { // Geolocation options
             enableHighAccuracy: true, // Try for more accuracy
             timeout: 10000, // Wait 10 seconds
@@ -1354,6 +1412,8 @@
         // *** Keep slider disabled if geolocation is not supported ***
         distanceSlider.disabled = true;
         distanceValueDisplay.textContent = `Geolocation not supported`;
+        // *** Ensure circle is null if geolocation not supported ***
+        userLocationCircle = null;
       }
     }
 
@@ -1423,6 +1483,10 @@
           "McDonald's": "$$",
           "KO COMBOS": "$",
           "Royal Castle": "$",
+          // *** Added Wendy's and Domino's with $$ ***
+          "Wendy's": "$$",
+          "Domino's": "$$",
+          "Domino's Pizza": "$$", // Added variation for Domino's
         };
 
         if (estimatedPrices.hasOwnProperty(normalizedName)) {
@@ -1492,68 +1556,79 @@
 
 
       // Get user's location and center map (async)
-      getUserLocation(mapInstance);
+      // This function will also draw the initial radius circle now
+      // *** Call getUserLocation and wait for it to complete before fetching data ***
+      // This ensures userLocation is set before data filtering happens.
+      return new Promise((resolve, reject) => {
+          getUserLocation(mapInstance); // This starts the async geolocation
+          // We need a way to know when getUserLocation is done and userLocation is set.
+          // For simplicity, we can use a short timeout, but a better way would be a Promise
+          // returned by getUserLocation or a callback. Let's use a timeout for now.
+          setTimeout(() => {
+            resolve(); // Assume getUserLocation will finish shortly
+          }, 1500); // Wait 1.5 seconds. Adjust as needed.
+        })
+        .then(() => {
+          // --- Fetch Data from OpenStreetMap using Overpass API ---
+          const overpassUrl = 'https://overpass-api.de/api/interpreter';
+          // Bounding box for Trinidad AND Tobago [South, West, North, East]
+          // Adjusted slightly for broader coverage including Tobago coasts
+          const bbox = "10.0,-61.95,11.4,-60.4";
+          const query = `
+                [out:json][timeout:45];
+                (
+                  // Query for nodes, ways, and relations matching amenities
+                  node["amenity"~"^(restaurant|fast_food|food_court|cafe)$"]["name"](${bbox}); /* Filter for name here */
+                  way["amenity"~"^(restaurant|fast_food|food_court|cafe)$"]["name"](${bbox});   /* Filter for name here */
+                  relation["amenity"~"^(restaurant|fast_food|food_court|cafe)$"]["name"](${bbox}); /* Filter for name here */
+                );
+                // Output geometry for ways/relations and standard output for nodes
+                out center; // Use 'center' for ways/relations to get a single point
+                >;
+                out skel qt; // Standard output format
+                `;
 
-      // --- Fetch Data from OpenStreetMap using Overpass API ---
-      const overpassUrl = 'https://overpass-api.de/api/interpreter';
-      // Bounding box for Trinidad AND Tobago [South, West, North, East]
-      // Adjusted slightly for broader coverage including Tobago coasts
-      const bbox = "10.0,-61.95,11.4,-60.4";
-      const query = `
-        [out:json][timeout:45];
-        (
-          // Query for nodes, ways, and relations matching amenities
-          node["amenity"~"^(restaurant|fast_food|food_court|cafe)$"]["name"](${bbox}); /* Filter for name here */
-          way["amenity"~"^(restaurant|fast_food|food_court|cafe)$"]["name"](${bbox});   /* Filter for name here */
-          relation["amenity"~"^(restaurant|fast_food|food_court|cafe)$"]["name"](${bbox}); /* Filter for name here */
-        );
-        // Output geometry for ways/relations and standard output for nodes
-        out center;
-        // Use 'center' for ways/relations to get a single point
-        >;
-        out skel qt; // Standard output format
-        `;
-
-      console.log("Fetching data from Overpass API...");
-      // Return the promise chain
-      return fetch(overpassUrl, {
-          method: 'POST',
-          // Use URLSearchParams for cleaner body construction
-          body: new URLSearchParams({
-            data: query
-          })
+          console.log("Fetching data from Overpass API...");
+          return fetch(overpassUrl, {
+            method: 'POST',
+            body: new URLSearchParams({
+              data: query
+            })
+          });
         })
         .then(response => {
           if (!response.ok) {
-            // Throw an error with status text for better debugging
             throw new Error(`Overpass API request failed: ${response.status} ${response.statusText}`);
           }
-          return response.json(); // Parse JSON response
+          return response.json();
         })
         .then(data => {
           console.log("Overpass Data Received:", data);
           if (!data || !data.elements) {
             console.warn("No elements found in Overpass response.");
-            allPlacesData = []; // Ensure it's an empty array
-            return; // Resolve with no data if empty
+            allPlacesData = [];
+            return;
           }
-          allPlacesData = data.elements; // Store the fetched data globally
+          allPlacesData = data.elements;
 
-          // Now that data is loaded, apply filters to display initial markers
+          // *** Now that both location and data are loaded, apply initial filters ***
           applyMapFilters();
 
         })
         .catch(error => {
           console.error("Failed to fetch or process Overpass data:", error);
           alert(`Could not load restaurant data. Please check your connection or try again later. Error: ${error.message}`);
-          throw error; // Re-throw to propagate the error
+          throw error;
         });
     }
+
 
     // --- Function to apply filters and update map markers ---
     function applyMapFilters() {
       if (!mapInstance || !allPlacesData || allPlacesData.length === 0) {
         console.warn("Map not initialized or no data loaded. Cannot apply filters.");
+        // Even if no data, try to manage the circle
+        manageDistanceCircle();
         return;
       }
 
@@ -1567,8 +1642,13 @@
       const typeFilter = document.getElementById('map-type-filter').value;
       const priceFilter = document.getElementById('map-price-filter').value;
       const distanceSlider = document.getElementById('map-distance-slider');
-      const distanceFilterKm = parseFloat(distanceSlider.value);
+      const distanceFilterValue = parseFloat(distanceSlider.value);
+      const maxDistanceSliderValue = parseFloat(distanceSlider.max); // Get max slider value
       const isDistanceFilterEnabled = !distanceSlider.disabled; // Check if slider is enabled
+
+
+      // *** Manage the radius circle visibility and size based on filter state ***
+      manageDistanceCircle();
 
 
       let filteredPlaces = allPlacesData.filter(place => {
@@ -1590,10 +1670,21 @@
         }
 
 
-        // Filter by Type
-        if (typeFilter !== 'all' && amenityType !== typeFilter) {
-          return false;
+        // *** Filter by Type - Modified logic to include food_court under fast_food ***
+        if (typeFilter !== 'all') {
+          if (typeFilter === 'fast_food') {
+            // If fast_food is selected, include both fast_food and food_court
+            if (amenityType !== 'fast_food' && amenityType !== 'food_court') {
+              return false;
+            }
+          } else {
+            // For other filter types, filter by the exact type
+            if (amenityType !== typeFilter) {
+              return false;
+            }
+          }
         }
+
 
         // Filter by Price (using estimated cost)
         const estimatedCost = getEstimatedCost(name, amenityType);
@@ -1601,12 +1692,12 @@
           return false;
         }
 
-        // Filter by Distance - Only apply if slider is enabled and not at max
-        if (isDistanceFilterEnabled && userLocation && distanceFilterKm < parseFloat(distanceSlider.max)) { // *** Check if enabled and distanceFilterKm is less than max ***
-          const distance = calculateDistance(userLocation.lat, userLocation.lng, lat, lon);
-          if (distance > distanceFilterKm) {
-            return false;
-          }
+        // *** Filter by Distance - Only apply if slider is enabled AND the value is NOT the "All" value ***
+        if (isDistanceFilterEnabled && userLocation && distanceFilterValue < maxDistanceSliderValue) {
+            const distance = calculateDistance(userLocation.lat, userLocation.lng, lat, lon);
+            if (distance > distanceFilterValue) {
+                return false;
+            }
         }
 
         // Basic check for valid coordinates and name (redundant with query filter but safe)
@@ -1661,7 +1752,7 @@
 
         const safeName = name; // Validated in filter
         const safeDisplayType = displayType !== undefined && displayType !== null ? displayType : 'Unknown Type';
-        const safeCost = cost !== undefined && cost !== null ? cost : 'N/A'; // *** Corrected this line ***
+        const safeCost = cost !== undefined && cost !== null ? cost : 'N/A';
 
         const popupContent = `
                  <b>${safeName}</b> <br>
@@ -1692,6 +1783,35 @@
 
     }
 
+    // --- Function to manage the distance circle visibility and size ---
+    function manageDistanceCircle() {
+      const distanceSlider = document.getElementById('map-distance-slider');
+      const distanceFilterValue = parseFloat(distanceSlider.value);
+      const isDistanceFilterEnabled = !distanceSlider.disabled; // Check if slider is enabled
+      const maxDistanceSliderValue = parseFloat(distanceSlider.max); // Get max slider value
+
+
+      // Remove existing circle if it exists
+      if (userLocationCircle && mapInstance.hasLayer(userLocationCircle)) {
+        mapInstance.removeLayer(userLocationCircle);
+        userLocationCircle = null; // Clear the reference
+      }
+
+      // Draw the circle if location is available and filter is enabled AND the value is NOT the "All" value
+      if (isDistanceFilterEnabled && userLocation && distanceFilterValue < maxDistanceSliderValue) {
+        userLocationCircle = L.circle([userLocation.lat, userLocation.lng], {
+          color: 'blue', // Color of the circle
+          fillColor: '#30f', // Fill color with some transparency
+          fillOpacity: 0.2, // Opacity of the fill
+          radius: distanceFilterValue * 1000 // Radius in meters
+        }).addTo(mapInstance);
+        console.log(`Distance circle drawn/updated with radius: ${distanceFilterValue} km`);
+      } else {
+        console.log("Distance circle not drawn/updated (location unavailable, filter disabled, or showing all).");
+      }
+    }
+
+
     // --- Function to reset map filters ---
     function resetMapFilters() {
       document.getElementById('map-type-filter').value = 'all';
@@ -1702,15 +1822,19 @@
 
       // Reset distance slider only if it's currently enabled (meaning location was successfully found)
       if (!distanceSlider.disabled) {
-        distanceSlider.value = distanceSlider.max; // Reset to max distance
+        // *** Reset to 10 (or your preferred default local range), NOT the max value ***
+        distanceSlider.value = 10;
         distanceValueDisplay.textContent = `${distanceSlider.value} km`; // Update display
       } else {
         // If slider is disabled, just reset the text
         distanceValueDisplay.textContent = `Location needed for distance`; // Or a specific error message
       }
 
+      // Ensure the circle is managed correctly after reset
+      manageDistanceCircle();
 
-      applyMapFilters(); // Re-apply filters (which will now show all places or filter based on state)
+
+      applyMapFilters(); // Re-apply filters
       console.log("Map filters reset.");
     }
 
@@ -1727,7 +1851,7 @@
         console.warn("User not logged in. Cannot load rated places.");
         // Hide filters if not logged in
         document.getElementById('rated-places-controls').style.display = 'none';
-        return;
+        return Promise.resolve(); // Return a resolved promise if no user
       }
 
       console.log("Loading rated places for user:", user.uid);
@@ -1735,7 +1859,7 @@
       // document.getElementById('rated-places-controls').style.display = 'block';
 
 
-      db.collection("ratings")
+      return db.collection("ratings")
         .where("userId", "==", user.uid)
         .get()
         .then((querySnapshot) => {
@@ -1803,14 +1927,15 @@
 
           console.log("Fetched and processed unique rated places with latest ratings:", currentUserRatings);
 
-          // Display the initial list (no filters applied yet)
-          displayFilteredPlaces(currentUserRatings);
+          // *** Removed direct call to displayFilteredPlaces here ***
+          // Filtering and display will now be handled by applyFilters()
 
         })
         .catch((error) => {
           console.error("Error fetching rated places:", error);
           ratedPlacesList.innerHTML = '<li>Error loading rated places.</li>';
-          alert("Failed to load your rated places. Please try again.");
+          alert("Failed to load your rated places. Please try again. Error: " + error.message);
+          throw error; // Re-throw to propagate the error to the async showRatedPlaces
         });
     }
 
@@ -1893,8 +2018,9 @@
 
       // Apply rating filter
       if (ratingFilter !== 'all') {
-        const minRating = parseInt(ratingFilter);
-        filtered = filtered.filter(rating => rating.rating >= minRating);
+        const exactRating = parseInt(ratingFilter); // Get the exact rating value
+        // *** Changed filtering logic to match exact rating ***
+        filtered = filtered.filter(rating => rating.rating === exactRating);
       }
 
       // Display the filtered results
@@ -1964,6 +2090,29 @@
         if (!userMenuContainer.contains(e.target) && e.target.id !== 'show-rated-places-button') {
           logoutOption.style.display = 'none';
         }
+      });
+
+      // Add event listener for distance slider input to update circle radius and re-apply filters
+      const distanceSlider = document.getElementById('map-distance-slider');
+      const distanceValueDisplay = document.getElementById('map-distance-value');
+      distanceSlider.addEventListener('input', function() {
+        // *** Update display text dynamically, showing "All" for max value ***
+        if (parseFloat(this.value) === parseFloat(this.max)) {
+          distanceValueDisplay.textContent = `All of T&T`;
+        } else {
+          distanceValueDisplay.textContent = `${this.value} km`;
+        }
+
+        // Update circle radius immediately on slide if circle exists and not showing all
+        if (userLocation && userLocationCircle && parseFloat(this.value) < parseFloat(this.max)) {
+          userLocationCircle.setRadius(this.value * 1000); // Radius in meters
+        } else if (userLocationCircle && parseFloat(this.value) === parseFloat(this.max)) {
+          // If slider moves to 'All', remove the circle immediately
+          if (mapInstance.hasLayer(userLocationCircle)) {
+            mapInstance.removeLayer(userLocationCircle);
+          }
+        }
+        // Filters are applied when the "Apply Filters" button is clicked, not on every slide
       });
 
 
