@@ -6,7 +6,7 @@
 
 ## 🚀 Live Demo
 
-🌐 [View the Live App](https://your-live-app-link-here.web.app)  
+🌐 [View the Live App](https://localbites-2025-c31a4.web.app/)  
 📺 [Watch the Presentation Video](https://youtube.com/your-unlisted-video-link)
 
 ---
